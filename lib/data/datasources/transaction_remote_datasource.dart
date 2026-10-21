@@ -1,36 +1,52 @@
-
 import '../../core/supabase_client.dart';
 import '../models/transaction_model.dart';
 
 class TransactionRemoteDataSource {
   final _db = SupabaseClientManager.db;
 
-  static const _pageSize = 30;
-  static const _cols = '*, categories(name, color, icon)';
+  static const int _pageSize = 30;
+  static const String _columns =
+      '*, categories(name, color, icon)';
 
-  // Tambah transaksi
-  Future<TransactionModel> add(TransactionModel transaction) async {
+  // Tambah transaksi.
+  Future<TransactionModel> add(
+    TransactionModel transaction,
+  ) async {
+    final userId = _db.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('User belum login.');
+    }
+
+    final data = transaction.toJson();
+    data['user_id'] = userId;
+
     final response = await _db
         .from('transactions')
-        .insert(transaction.toJson())
-        .select(_cols)
+        .insert(data)
+        .select(_columns)
         .single();
 
-    return TransactionModel.fromJson(response);
+    return TransactionModel.fromJson(
+      Map<String, dynamic>.from(response),
+    );
   }
 
-  // Riwayat dengan filter dan pagination
+  // Ambil riwayat transaksi dengan filter opsional.
   Future<List<TransactionModel>> history({
     int page = 0,
     int? categoryId,
     int? periodId,
-    String? method,
     String? type,
+    String? method,
+    String? source,
     String? search,
     DateTime? from,
     DateTime? to,
   }) async {
-    var query = _db.from('transactions').select(_cols);
+    var query = _db
+        .from('transactions')
+        .select(_columns);
 
     if (categoryId != null) {
       query = query.eq('category_id', categoryId);
@@ -40,12 +56,16 @@ class TransactionRemoteDataSource {
       query = query.eq('period_id', periodId);
     }
 
+    if (type != null) {
+      query = query.eq('type', type);
+    }
+
     if (method != null) {
       query = query.eq('method', method);
     }
 
-    if (type != null) {
-      query = query.eq('type', type);
+    if (source != null) {
+      query = query.eq('source', source);
     }
 
     if (search != null && search.trim().isNotEmpty) {
@@ -68,7 +88,10 @@ class TransactionRemoteDataSource {
 
     final response = await query
         .order('occurred_at', ascending: false)
-        .range(page * _pageSize, (page + 1) * _pageSize - 1);
+        .range(
+          page * _pageSize,
+          (page + 1) * _pageSize - 1,
+        );
 
     return response
         .map<TransactionModel>(
@@ -79,28 +102,51 @@ class TransactionRemoteDataSource {
         .toList();
   }
 
-  // Edit transaksi
+  // Ambil satu transaksi berdasarkan ID.
+  Future<TransactionModel> getById(int id) async {
+    final response = await _db
+        .from('transactions')
+        .select(_columns)
+        .eq('id', id)
+        .single();
+
+    return TransactionModel.fromJson(
+      Map<String, dynamic>.from(response),
+    );
+  }
+
+  // Edit transaksi.
   Future<TransactionModel> update(
     TransactionModel transaction,
   ) async {
     final id = transaction.id;
 
     if (id == null) {
-      throw ArgumentError('ID transaksi wajib diisi untuk edit.');
+      throw ArgumentError(
+        'ID transaksi wajib diisi untuk edit.',
+      );
     }
 
     final response = await _db
         .from('transactions')
-        .update(transaction.toJson())
+        .update({
+          ...transaction.toJson(),
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
         .eq('id', id)
-        .select(_cols)
+        .select(_columns)
         .single();
 
-    return TransactionModel.fromJson(response);
+    return TransactionModel.fromJson(
+      Map<String, dynamic>.from(response),
+    );
   }
 
-  // Hapus transaksi
+  // Hapus transaksi.
   Future<void> delete(int id) async {
-    await _db.from('transactions').delete().eq('id', id);
+    await _db
+        .from('transactions')
+        .delete()
+        .eq('id', id);
   }
 }

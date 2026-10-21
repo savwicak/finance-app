@@ -1,30 +1,37 @@
-
 class TransactionModel {
   final int? id;
-  final int amount;
-  final int? categoryId;
+  final String? userId;
   final int? periodId;
-  final String method;
+  final int? categoryId;
   final String type;
+  final int amount;
+  final String method;
   final String? note;
   final DateTime occurredAt;
+  final String source;
   final int? receiptId;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
-  // data kategori dari relasi supabase, untuk ditampilkan di ui
+  // Data kategori untuk ditampilkan di UI.
   final String? categoryName;
   final String? categoryColor;
   final String? categoryIcon;
 
   const TransactionModel({
     this.id,
-    required this.amount,
-    this.categoryId,
+    this.userId,
     this.periodId,
+    this.categoryId,
+    required this.type,
+    required this.amount,
     this.method = 'tunai',
-    this.type = 'expense',
     this.note,
     required this.occurredAt,
+    this.source = 'manual',
     this.receiptId,
+    this.createdAt,
+    this.updatedAt,
     this.categoryName,
     this.categoryColor,
     this.categoryIcon,
@@ -34,15 +41,25 @@ class TransactionModel {
     final category = json['categories'];
 
     return TransactionModel(
-      id: json['id'] as int?,
+      id: (json['id'] as num?)?.toInt(),
+      userId: json['user_id'] as String?,
+      periodId: (json['period_id'] as num?)?.toInt(),
+      categoryId: (json['category_id'] as num?)?.toInt(),
+      type: json['type'] as String,
       amount: (json['amount'] as num).toInt(),
-      categoryId: json['category_id'] as int?,
-      periodId: json['period_id'] as int?,
       method: json['method'] as String? ?? 'tunai',
-      type: json['type'] as String? ?? 'expense',
       note: json['note'] as String?,
-      occurredAt: DateTime.parse(json['occurred_at'].toString()),
-      receiptId: json['receipt_id'] as int?,
+      occurredAt: DateTime.parse(
+        json['occurred_at'].toString(),
+      ),
+      source: json['source'] as String? ?? 'manual',
+      receiptId: (json['receipt_id'] as num?)?.toInt(),
+      createdAt: json['created_at'] == null
+          ? null
+          : DateTime.parse(json['created_at'].toString()),
+      updatedAt: json['updated_at'] == null
+          ? null
+          : DateTime.parse(json['updated_at'].toString()),
       categoryName: category is Map
           ? category['name'] as String?
           : null,
@@ -57,13 +74,14 @@ class TransactionModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'amount': amount,
-      'category_id': categoryId,
       'period_id': periodId,
-      'method': method,
+      'category_id': categoryId,
       'type': type,
+      'amount': amount,
+      'method': method,
       'note': note,
       'occurred_at': occurredAt.toUtc().toIso8601String(),
+      'source': source,
       'receipt_id': receiptId,
     };
   }

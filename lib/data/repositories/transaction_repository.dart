@@ -1,4 +1,3 @@
-
 import '../datasources/transaction_remote_datasource.dart';
 import '../models/transaction_model.dart';
 
@@ -8,9 +7,11 @@ class TransactionRepository {
   TransactionRepository({
     TransactionRemoteDataSource? dataSource,
   }) : _dataSource =
-           dataSource ?? TransactionRemoteDataSource();
+            dataSource ?? TransactionRemoteDataSource();
 
-  Future<TransactionModel> add(TransactionModel transaction) {
+  Future<TransactionModel> add(
+    TransactionModel transaction,
+  ) {
     return _dataSource.add(transaction);
   }
 
@@ -18,8 +19,9 @@ class TransactionRepository {
     int page = 0,
     int? categoryId,
     int? periodId,
-    String? method,
     String? type,
+    String? method,
+    String? source,
     String? search,
     DateTime? from,
     DateTime? to,
@@ -28,15 +30,22 @@ class TransactionRepository {
       page: page,
       categoryId: categoryId,
       periodId: periodId,
-      method: method,
       type: type,
+      method: method,
+      source: source,
       search: search,
       from: from,
       to: to,
     );
   }
 
-  Future<TransactionModel> update(TransactionModel transaction) {
+  Future<TransactionModel> getById(int id) {
+    return _dataSource.getById(id);
+  }
+
+  Future<TransactionModel> update(
+    TransactionModel transaction,
+  ) {
     return _dataSource.update(transaction);
   }
 
