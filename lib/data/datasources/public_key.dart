@@ -1,1 +1,0 @@
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OkWYsX04GUY36Hg7-J6WWg_fdVkSE_g";
