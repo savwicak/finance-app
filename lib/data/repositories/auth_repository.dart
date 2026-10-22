@@ -1,36 +1,23 @@
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../datasources/auth_remote_datasource.dart';
 
 class AuthRepository {
-  final AuthRemoteDataSource _dataSource;
+  AuthRepository(this._remote);
+  final AuthRemoteDatasource _remote;
 
-  AuthRepository({
-    AuthRemoteDataSource? dataSource,
-  }) : _dataSource =
-           dataSource ?? AuthRemoteDataSource();
+  Stream<AuthState> get authChanges => _remote.authChanges;
+  Session? get session => _remote.session;
+  User? get user => _remote.user;
 
-  User? get user => _dataSource.user;
+  Future<AuthResponse> register(String name, String email, String password) =>
+      _remote.signUp(email.trim(), password, name.trim());
 
-  Stream<AuthState> get changes => _dataSource.changes;
+  Future<AuthResponse> login(String email, String password) =>
+      _remote.signIn(email.trim(), password);
 
-  Future<AuthResponse> register(
-    String email,
-    String password,
-    String name,
-  ) {
-    return _dataSource.register(email, password, name);
-  }
+  Future<void> logout() => _remote.signOut();
 
-  Future<AuthResponse> login(
-    String email,
-    String password,
-  ) {
-    return _dataSource.login(email, password);
-  }
-
-  Future<void> logout() {
-    return _dataSource.logout();
-  }
+  Future<Map<String, dynamic>?> myProfile() => _remote.fetchProfile();
+  Future<int> myCategoryCount() => _remote.fetchCategoryCount();
 }

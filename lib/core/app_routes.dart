@@ -6,6 +6,7 @@ import 'package:nvidiaapp/presentation/screens/auth/login_screen.dart';
 import 'package:nvidiaapp/presentation/screens/auth/register_screen.dart';
 import 'package:nvidiaapp/presentation/screens/history/history_category_screen.dart';
 import 'package:nvidiaapp/presentation/screens/history/history_general_screen.dart';
+import 'package:nvidiaapp/presentation/screens/home/home_screen.dart';
 import 'package:nvidiaapp/presentation/screens/impulsive_calculator/impulsive_calculator_screen.dart';
 import 'package:nvidiaapp/presentation/screens/onboarding/on_boarding_screen.dart';
 import 'package:nvidiaapp/presentation/screens/splash/splash_screen.dart';
@@ -39,6 +40,10 @@ class Routes {
     GetPage(
       name: main, 
       page: () => MyApp(),
+    ),
+    GetPage(
+      name: home, 
+      page: () => HomeScreen(),
     ),
     GetPage(
       name: login, 
