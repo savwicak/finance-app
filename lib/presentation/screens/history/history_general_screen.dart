@@ -10,6 +10,10 @@ class HistoryGeneralScreen extends StatefulWidget {
 class _HistoryGeneralScreenState extends State<HistoryGeneralScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      body: SafeArea(
+        child: Text("History")
+      ),
+    );
   }
 }

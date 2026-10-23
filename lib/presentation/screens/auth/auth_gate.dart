@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nvidiaapp/core/di.dart';
-import 'package:nvidiaapp/presentation/screens/home/home_screen.dart';
+import 'package:nvidiaapp/core/navigation/app_navigation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'login_screen.dart';
@@ -16,7 +16,8 @@ class AuthGate extends StatelessWidget {
       stream: authRepository.authChanges,
       builder: (context, snapshot) {
         final session = snapshot.data?.session ?? authRepository.session;
-        return session == null ? const LoginScreen() : const HomeScreen();
+
+        return session == null ? const LoginScreen() : const AppNavigation();
       },
     );
   }

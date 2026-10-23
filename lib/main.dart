@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/app_routes.dart';
-import 'package:nvidiaapp/core/supabase_config.dart';
+import 'package:nvidiaapp/core/supabase/supabase_config.dart';
+import 'package:nvidiaapp/presentation/screens/auth/auth_gate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Supabase.initialize(
     url: SupabaseConfig.url,
-    publishableKey: SupabaseConfig.publishableKey
+    publishableKey: SupabaseConfig.publishableKey,
   );
+
   runApp(const MyApp());
 }
 
@@ -24,10 +27,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Finance App',
       theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      initialRoute: Routes.login,
-      getPages: Routes.pages
+      home: const AuthGate(),
+      getPages: Routes.pages,
     );
   }
 }

@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final ok = await authController.login(_email.text, _password.text);
     if (ok && mounted) {
       debugPrint('[AUTH] pindah ke ${Routes.home}');
-      Get.offAllNamed(Routes.home);
+      Get.offAllNamed(Routes.authGate);
     }
 }
 
