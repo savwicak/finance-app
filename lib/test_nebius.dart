@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:nvidiaapp/features/auth/data/datasources/nebius_datasource.dart';
+import 'package:nvidiaapp/oldnebius/nebius_datasource.dart';
 
 Future<void> testNebius() async {
   final ai = NebiusDatasource();

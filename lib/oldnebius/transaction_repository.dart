@@ -1,5 +1,5 @@
-import '../datasources/transaction_remote_datasource.dart';
-import '../models/transaction_model.dart';
+import 'transaction_remote_datasource.dart';
+import 'transaction_model.dart';
 
 class TransactionRepository {
   final TransactionRemoteDataSource _dataSource;

@@ -1,5 +1,5 @@
-import '../../../../core/supabase/supabase_client.dart';
-import '../models/transaction_model.dart';
+import '../core/supabase/supabase_client.dart';
+import 'transaction_model.dart';
 
 class TransactionRemoteDataSource {
   final _db = SupabaseClientManager.db;
