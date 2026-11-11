@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/app_routes.dart';
 import 'package:nvidiaapp/core/supabase/supabase_config.dart';
 import 'package:nvidiaapp/presentation/screens/auth/auth_gate.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+=======
+import 'package:nvidiaapp/presentation/screens/splash/splash_screen.dart';
+>>>>>>> 4d363e7 (feat: splash screen, onboarding, apptheme)
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +27,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Finance App',
@@ -34,3 +39,13 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+=======
+    return MaterialApp(
+      title: "Nvidia App",
+      debugShowCheckedModeBanner: false,
+      // theme: AppTheme.theme,
+      home: SplashScreen(),
+    );
+  }
+}
+>>>>>>> 4d363e7 (feat: splash screen, onboarding, apptheme)
