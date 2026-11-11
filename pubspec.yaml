@@ -31,16 +31,15 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-<<<<<<< HEAD
   supabase_flutter: ^2.18.3
   get: ^4.7.3
   intl: ^0.20.3
-=======
   google_fonts: ^9.0.0
->>>>>>> 4d363e7 (feat: splash screen, onboarding, apptheme)
+  shared_preferences: ^2.5.6
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
 
 dev_dependencies:
   flutter_test:
@@ -52,7 +51,6 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -90,8 +88,6 @@ flutter:
           weight: 400
         - asset: assets/fonts/HelveticaNeueMedium.otf
           weight: 600
-        - asset: assets/fonts/HelveticaNeueRegular.otf
-          weight: 500
         - asset: assets/fonts/HelveticaNeueThin.otf
           weight: 300
   #

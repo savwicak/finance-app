@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../data/repositories/auth_repository.dart';
+import '../data/repositories/auth_repository.dart';
 
 class AuthController extends ChangeNotifier {
   AuthController(this._repo);

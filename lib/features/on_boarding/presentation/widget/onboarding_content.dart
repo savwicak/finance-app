@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:nvidiaapp/presentation/theme/app_theme.dart';
 
-class buildOnBoardingContent extends StatelessWidget {
-  buildOnBoardingContent({
+import 'package:flutter/material.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
+
+class OnboardingContent extends StatelessWidget {
+  const OnboardingContent({
     super.key,
     required this.image,
     required this.title,
@@ -21,15 +22,12 @@ class buildOnBoardingContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
-          // Image
-          Container(
+          SizedBox(
             height: 340,
-            alignment: Alignment.center,
             child: Image.asset(
               image,
               fit: BoxFit.contain,
-              errorBuilder: (context, error, StackTrace) {
-                // If image isnt supported/not loaded
+              errorBuilder: (context, error, stackTrace) {
                 return const Icon(
                   Icons.image_not_supported_outlined,
                   size: 100,
@@ -38,8 +36,7 @@ class buildOnBoardingContent extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(height: 40),
-          // Title
+          const SizedBox(height: 40),
           Text(
             title,
             textAlign: TextAlign.center,
@@ -51,18 +48,17 @@ class buildOnBoardingContent extends StatelessWidget {
               letterSpacing: -0.5,
             ),
           ),
-          // Description
           Text(
             description,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w400,
               color: Colors.grey,
               height: 1.5,
             ),
           ),
-          Spacer(),
+          const Spacer(),
         ],
       ),
     );

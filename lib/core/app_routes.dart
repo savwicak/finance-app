@@ -1,86 +1,95 @@
-//buat isi routes nanti tinggal di ambil
 
 import 'package:get/get.dart';
-import 'package:nvidiaapp/presentation/screens/auth/auth_gate.dart';
-import 'package:nvidiaapp/presentation/screens/auth/login_screen.dart';
-import 'package:nvidiaapp/presentation/screens/auth/register_screen.dart';
-import 'package:nvidiaapp/presentation/screens/category/category_screen.dart';
-import 'package:nvidiaapp/presentation/screens/history/history_category_screen.dart';
-import 'package:nvidiaapp/presentation/screens/history/history_general_screen.dart';
-import 'package:nvidiaapp/presentation/screens/home/home_screen.dart';
-import 'package:nvidiaapp/presentation/screens/impulsive_calculator/impulsive_calculator_screen.dart';
-import 'package:nvidiaapp/presentation/screens/onboarding/on_boarding_screen.dart';
-import 'package:nvidiaapp/presentation/screens/splash/splash_screen.dart';
-import 'package:nvidiaapp/presentation/screens/wishlist/wishlist_screen.dart';
+
+import 'package:nvidiaapp/features/auth/auth_gate.dart';
+import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
+import 'package:nvidiaapp/features/auth/presentation/screens/register_screen.dart';
+import 'package:nvidiaapp/features/category/category_screen.dart';
+import 'package:nvidiaapp/features/history/history_category_screen.dart';
+import 'package:nvidiaapp/features/history/history_general_screen.dart';
+import 'package:nvidiaapp/features/home/home_screen.dart';
+import 'package:nvidiaapp/features/impulsive_calculator/impulsive_calculator_screen.dart';
+import 'package:nvidiaapp/features/on_boarding/presentation/screens/on_boarding_screen.dart';
+import 'package:nvidiaapp/features/splash/splash_screen.dart';
+import 'package:nvidiaapp/features/wishlist/wishlist_screen.dart';
 
 class Routes {
-  //auth
-  static const String login = "/login";
-  static const String register = "/register";
-  static const String authGate = "/auth-gate";
-  //history
-  static const String historyGeneral = "/history-general";
-  static const String historyCategory = "/history-category";
-  //home
-  static const String home = "/home";
-  //implusive calculator
-  static const String impulsiveCalculator = "/impulsive-calculator";
-  //onboarding
-  static const String onBoarding = "/onboarding";
-  //splashscreeen
-  static const String splash = "/splash";
-  //whislist
-  static const String wishlist = "/wishlist";
-  //category
-  static const String category = "/category";
+  // Initial
+  static const String initial = '/';
+  static const String splash = '/splash';
 
+  // Auth
+  static const String login = '/login';
+  static const String register = '/register';
+  static const String authGate = '/auth-gate';
 
+  // History
+  static const String historyGeneral = '/history-general';
+  static const String historyCategory = '/history-category';
+
+  // Home
+  static const String home = '/home';
+
+  // Impulsive Calculator
+  static const String impulsiveCalculator = '/impulsive-calculator';
+
+  // Onboarding
+  static const String onBoarding = '/on-boarding';
+
+  // Wishlist
+  static const String wishlist = '/wishlist';
+
+  // Category
+  static const String category = '/category';
 
   static final pages = [
     GetPage(
-      name: splash, 
-      page: () => SplashScreen(),
+      name: initial,
+      page: () => const SplashScreen(),
     ),
     GetPage(
-      name: authGate, 
-      page: () => AuthGate(),
-      ),
-    GetPage(
-      name: home, 
-      page: () => HomeScreen(),
+      name: splash,
+      page: () => const SplashScreen(),
     ),
     GetPage(
-      name: login, 
-      page: () => LoginScreen(),
+      name: authGate,
+      page: () => const AuthGate(),
     ),
     GetPage(
-      name: register, 
-      page: () => RegisterScreen(),
+      name: login,
+      page: () => const LoginScreen(),
     ),
     GetPage(
-      name: historyGeneral, 
-      page: () => HistoryGeneralScreen(),
+      name: register,
+      page: () => const RegisterScreen(),
     ),
     GetPage(
-      name: historyCategory, 
-      page: () => HistoryCategoryScreen(),
+      name: home,
+      page: () => const HomeScreen(),
     ),
     GetPage(
-      name: impulsiveCalculator, 
-      page: () => ImpulsiveCalculatorScreen(),
+      name: historyGeneral,
+      page: () => const HistoryGeneralScreen(),
     ),
     GetPage(
-      name: onBoarding, 
-      page: () => OnBoardingScreen(),
+      name: historyCategory,
+      page: () => const HistoryCategoryScreen(),
     ),
     GetPage(
-      name: wishlist, 
-      page: () => WishlistScreen(),
+      name: impulsiveCalculator,
+      page: () => const ImpulsiveCalculatorScreen(),
     ),
     GetPage(
-      name: category, 
-      page: () => CategoryScreen(),
+      name: onBoarding,
+      page: () => const OnboardingScreen(),
+    ),
+    GetPage(
+      name: wishlist,
+      page: () => const WishlistScreen(),
+    ),
+    GetPage(
+      name: category,
+      page: () => const CategoryScreen(),
     ),
   ];
 }
-

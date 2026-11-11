@@ -1,8 +1,10 @@
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:nvidiaapp/presentation/screens/onboarding/onboarding_screen.dart';
-import 'package:nvidiaapp/presentation/theme/app_theme.dart';
+import 'package:get/get.dart';
+import 'package:nvidiaapp/core/app_routes.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,16 +15,13 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  // Timer to wait for 3 seconds before directing to Onboarding Screen
   void initState() {
     super.initState();
-    Timer(
-      const Duration(seconds: 3),
-      () => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => OnboardingScreen()),
-      ),
-    );
+
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+      Get.offAllNamed(Routes.authGate);
+    });
   }
 
   @override
@@ -33,11 +32,14 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.wallet_rounded, color: Colors.white, size: 64),
-              SizedBox(height: 10),
-              Text(
+              const Icon(
+                Icons.wallet_rounded,
+                color: Colors.white,
+                size: 64,
+              ),
+              const SizedBox(height: 10),
+              const Text(
                 "Savy",
                 style: TextStyle(
                   color: Colors.white,
