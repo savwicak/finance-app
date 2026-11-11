@@ -1,1 +1,0 @@
-buat naruh semua controller kaya kalkulator di taro di sini
