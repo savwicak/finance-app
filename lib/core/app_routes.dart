@@ -10,7 +10,7 @@ import 'package:nvidiaapp/features/home/home_screen.dart';
 import 'package:nvidiaapp/features/impulsive_calculator/impulsive_calculator_screen.dart';
 import 'package:nvidiaapp/features/on_boarding/presentation/screens/on_boarding_screen.dart';
 import 'package:nvidiaapp/features/splash/splash_screen.dart';
-import 'package:nvidiaapp/features/wishlist/wishlist_screen.dart';
+import 'package:nvidiaapp/features/wishlist/presentation/screen/savings_screen.dart';
 
 class Routes {
   // Initial
@@ -84,7 +84,7 @@ class Routes {
     ),
     GetPage(
       name: wishlist,
-      page: () => const WishlistScreen(),
+      page: () => SavingsScreen(),
     ),
     GetPage(
       name: category,
