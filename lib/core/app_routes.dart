@@ -1,10 +1,9 @@
 
 import 'package:get/get.dart';
-
 import 'package:nvidiaapp/features/auth/auth_gate.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/register_screen.dart';
-import 'package:nvidiaapp/features/category/category_screen.dart';
+import 'package:nvidiaapp/features/category/presentation/screen/category_screen.dart';
 import 'package:nvidiaapp/features/history/history_category_screen.dart';
 import 'package:nvidiaapp/features/history/history_general_screen.dart';
 import 'package:nvidiaapp/features/home/home_screen.dart';
@@ -89,7 +88,7 @@ class Routes {
     ),
     GetPage(
       name: category,
-      page: () => const CategoryScreen(),
+      page: () => CategoryScreen(),
     ),
   ];
 }

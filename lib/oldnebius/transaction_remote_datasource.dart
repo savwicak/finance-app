@@ -1,152 +1,153 @@
-import '../core/supabase/supabase_client.dart';
-import 'transaction_model.dart';
+// import 'package:nvidiaapp/core/supabase_client.dart';
 
-class TransactionRemoteDataSource {
-  final _db = SupabaseClientManager.db;
+// import 'transaction_model.dart';
 
-  static const int _pageSize = 30;
-  static const String _columns =
-      '*, categories(name, color, icon)';
+// class TransactionRemoteDataSource {
+//   // final _db = SupabaseClientManager().db;
 
-  // Tambah transaksi.
-  Future<TransactionModel> add(
-    TransactionModel transaction,
-  ) async {
-    final userId = _db.auth.currentUser?.id;
+//   static const int _pageSize = 30;
+//   static const String _columns =
+//       '*, categories(name, color, icon)';
 
-    if (userId == null) {
-      throw Exception('User belum login.');
-    }
+//   // Tambah transaksi.
+//   Future<TransactionModel> add(
+//     TransactionModel transaction,
+//   ) async {
+//     final userId = _db.auth.currentUser?.id;
 
-    final data = transaction.toJson();
-    data['user_id'] = userId;
+//     if (userId == null) {
+//       throw Exception('User belum login.');
+//     }
 
-    final response = await _db
-        .from('transactions')
-        .insert(data)
-        .select(_columns)
-        .single();
+//     final data = transaction.toJson();
+//     data['user_id'] = userId;
 
-    return TransactionModel.fromJson(
-      Map<String, dynamic>.from(response),
-    );
-  }
+//     final response = await _db
+//         .from('transactions')
+//         .insert(data)
+//         .select(_columns)
+//         .single();
 
-  // Ambil riwayat transaksi dengan filter opsional.
-  Future<List<TransactionModel>> history({
-    int page = 0,
-    int? categoryId,
-    int? periodId,
-    String? type,
-    String? method,
-    String? source,
-    String? search,
-    DateTime? from,
-    DateTime? to,
-  }) async {
-    var query = _db
-        .from('transactions')
-        .select(_columns);
+//     return TransactionModel.fromJson(
+//       Map<String, dynamic>.from(response),
+//     );
+//   }
 
-    if (categoryId != null) {
-      query = query.eq('category_id', categoryId);
-    }
+//   // Ambil riwayat transaksi dengan filter opsional.
+//   Future<List<TransactionModel>> history({
+//     int page = 0,
+//     int? categoryId,
+//     int? periodId,
+//     String? type,
+//     String? method,
+//     String? source,
+//     String? search,
+//     DateTime? from,
+//     DateTime? to,
+//   }) async {
+//     var query = _db
+//         .from('transactions')
+//         .select(_columns);
 
-    if (periodId != null) {
-      query = query.eq('period_id', periodId);
-    }
+//     if (categoryId != null) {
+//       query = query.eq('category_id', categoryId);
+//     }
 
-    if (type != null) {
-      query = query.eq('type', type);
-    }
+//     if (periodId != null) {
+//       query = query.eq('period_id', periodId);
+//     }
 
-    if (method != null) {
-      query = query.eq('method', method);
-    }
+//     if (type != null) {
+//       query = query.eq('type', type);
+//     }
 
-    if (source != null) {
-      query = query.eq('source', source);
-    }
+//     if (method != null) {
+//       query = query.eq('method', method);
+//     }
 
-    if (search != null && search.trim().isNotEmpty) {
-      query = query.ilike('note', '%${search.trim()}%');
-    }
+//     if (source != null) {
+//       query = query.eq('source', source);
+//     }
 
-    if (from != null) {
-      query = query.gte(
-        'occurred_at',
-        from.toUtc().toIso8601String(),
-      );
-    }
+//     if (search != null && search.trim().isNotEmpty) {
+//       query = query.ilike('note', '%${search.trim()}%');
+//     }
 
-    if (to != null) {
-      query = query.lt(
-        'occurred_at',
-        to.toUtc().toIso8601String(),
-      );
-    }
+//     if (from != null) {
+//       query = query.gte(
+//         'occurred_at',
+//         from.toUtc().toIso8601String(),
+//       );
+//     }
 
-    final response = await query
-        .order('occurred_at', ascending: false)
-        .range(
-          page * _pageSize,
-          (page + 1) * _pageSize - 1,
-        );
+//     if (to != null) {
+//       query = query.lt(
+//         'occurred_at',
+//         to.toUtc().toIso8601String(),
+//       );
+//     }
 
-    return response
-        .map<TransactionModel>(
-          (item) => TransactionModel.fromJson(
-            Map<String, dynamic>.from(item),
-          ),
-        )
-        .toList();
-  }
+//     final response = await query
+//         .order('occurred_at', ascending: false)
+//         .range(
+//           page * _pageSize,
+//           (page + 1) * _pageSize - 1,
+//         );
 
-  // Ambil satu transaksi berdasarkan ID.
-  Future<TransactionModel> getById(int id) async {
-    final response = await _db
-        .from('transactions')
-        .select(_columns)
-        .eq('id', id)
-        .single();
+//     return response
+//         .map<TransactionModel>(
+//           (item) => TransactionModel.fromJson(
+//             Map<String, dynamic>.from(item),
+//           ),
+//         )
+//         .toList();
+//   }
 
-    return TransactionModel.fromJson(
-      Map<String, dynamic>.from(response),
-    );
-  }
+//   // Ambil satu transaksi berdasarkan ID.
+//   Future<TransactionModel> getById(int id) async {
+//     final response = await _db
+//         .from('transactions')
+//         .select(_columns)
+//         .eq('id', id)
+//         .single();
 
-  // Edit transaksi.
-  Future<TransactionModel> update(
-    TransactionModel transaction,
-  ) async {
-    final id = transaction.id;
+//     return TransactionModel.fromJson(
+//       Map<String, dynamic>.from(response),
+//     );
+//   }
 
-    if (id == null) {
-      throw ArgumentError(
-        'ID transaksi wajib diisi untuk edit.',
-      );
-    }
+//   // Edit transaksi.
+//   Future<TransactionModel> update(
+//     TransactionModel transaction,
+//   ) async {
+//     final id = transaction.id;
 
-    final response = await _db
-        .from('transactions')
-        .update({
-          ...transaction.toJson(),
-          'updated_at': DateTime.now().toUtc().toIso8601String(),
-        })
-        .eq('id', id)
-        .select(_columns)
-        .single();
+//     if (id == null) {
+//       throw ArgumentError(
+//         'ID transaksi wajib diisi untuk edit.',
+//       );
+//     }
 
-    return TransactionModel.fromJson(
-      Map<String, dynamic>.from(response),
-    );
-  }
+//     final response = await _db
+//         .from('transactions')
+//         .update({
+//           ...transaction.toJson(),
+//           'updated_at': DateTime.now().toUtc().toIso8601String(),
+//         })
+//         .eq('id', id)
+//         .select(_columns)
+//         .single();
 
-  // Hapus transaksi.
-  Future<void> delete(int id) async {
-    await _db
-        .from('transactions')
-        .delete()
-        .eq('id', id);
-  }
-}
+//     return TransactionModel.fromJson(
+//       Map<String, dynamic>.from(response),
+//     );
+//   }
+
+//   // Hapus transaksi.
+//   Future<void> delete(int id) async {
+//     await _db
+//         .from('transactions')
+//         .delete()
+//         .eq('id', id);
+//   }
+// }
