@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 
 class CategoryCard extends StatelessWidget {
   final Map<String, dynamic> category;
@@ -15,7 +16,7 @@ class CategoryCard extends StatelessWidget {
       final hex = (value ?? '#B8E600').replaceAll('#', '');
       return Color(int.parse('FF$hex', radix: 16));
     } catch (_) {
-      return const Color(0xFFB8E600);
+      return AppTheme.primary;
     }
   }
 
@@ -93,7 +94,7 @@ class CategoryCard extends StatelessWidget {
                   '0% out of total',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 11,
+                    fontSize: 12,
                   ),
                 ),
               ),
@@ -103,7 +104,7 @@ class CategoryCard extends StatelessWidget {
               bottom: 0,
               child: CircleAvatar(
                 radius: 19,
-                backgroundColor: Color(0xFFB8E600),
+                backgroundColor: AppTheme.primary,
                 child: Icon(
                   Icons.north_east,
                   color: Colors.white,

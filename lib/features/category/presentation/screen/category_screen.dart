@@ -1,8 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:nvidiaapp/features/category/presentation/widgets/category_card.dart';
+
 import '../../controllers/category_controller.dart';
 import 'add_category_screen.dart';
 
@@ -20,24 +21,13 @@ class CategoryScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 12),
-
-            Row(
-              children: [
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      'Categories',
-                      style: TextStyle(
-                        fontSize: 23,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 48),
-              ],
+            Center(
+              child: Text(
+                'Categories',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+              ),
             ),
-
+            SizedBox(height: 12),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -74,9 +64,7 @@ class CategoryScreen extends StatelessWidget {
                   const SizedBox(width: 10),
                   ElevatedButton.icon(
                     onPressed: () async {
-                      final result = await Get.to(
-                        () => AddCategoryScreen(),
-                      );
+                      final result = await Get.to(() => AddCategoryScreen());
 
                       if (result == true) {
                         controller.fetchCategories();
@@ -91,7 +79,7 @@ class CategoryScreen extends StatelessWidget {
                       ),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFB8E600),
+                      backgroundColor: AppTheme.primary,
                       elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 18,
@@ -111,17 +99,13 @@ class CategoryScreen extends StatelessWidget {
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
-                  );
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 final items = controller.filteredCategories;
 
                 if (items.isEmpty) {
-                  return const Center(
-                    child: Text('Belum ada kategori'),
-                  );
+                  return const Center(child: Text('Belum ada kategori'));
                 }
 
                 return RefreshIndicator(
@@ -149,7 +133,8 @@ class CategoryScreen extends StatelessWidget {
                                     ),
                                     actions: [
                                       TextButton(
-                                        onPressed: () => Get.back(result: false),
+                                        onPressed: () =>
+                                            Get.back(result: false),
                                         child: const Text('Cancel'),
                                       ),
                                       TextButton(

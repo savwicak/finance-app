@@ -1,6 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
+
 import '../../controllers/category_controller.dart';
 
 class AddCategoryScreen extends StatefulWidget {
@@ -49,9 +50,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   // CONVERT HEX TO COLOR
   Color getColor(String hex) {
-    return Color(
-      int.parse('FF${hex.replaceAll('#', '')}', radix: 16),
-    );
+    return Color(int.parse('FF${hex.replaceAll('#', '')}', radix: 16));
   }
 
   // SAVE CATEGORY
@@ -80,15 +79,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         'Success!',
         'Kategori berhasil ditambahkan!',
         snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFFB8E600),
+        backgroundColor: AppTheme.primary,
         colorText: Colors.black,
         margin: const EdgeInsets.all(15),
         borderRadius: 12,
         duration: const Duration(seconds: 2),
-        icon: const Icon(
-          Icons.check_circle,
-          color: Colors.black,
-        ),
+        icon: const Icon(Icons.check_circle, color: Colors.black),
       );
     }
   }
@@ -102,229 +98,243 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFFFFCFC),
-
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFFCFC),
         elevation: 0,
         leading: IconButton(
           onPressed: () => Get.back(),
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-          ),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
         ),
         title: const Text(
           'Add Category',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
       ),
-
       body: SafeArea(
         child: Form(
           key: formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(20),
+          child: Column(
             children: [
+              // FORM CONTENT
+              Expanded(
+                child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // CATEGORY NAME
+                            const Text(
+                              'Category Name',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
 
-              // CATEGORY NAME
-              const Text(
-                'Category Name',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
+                            const SizedBox(height: 10),
 
-              const SizedBox(height: 10),
+                            TextFormField(
+                              controller: nameController,
+                              textCapitalization: TextCapitalization.words,
+                              decoration: InputDecoration(
+                                hintText: 'Example: Food & Drink',
+                                filled: true,
+                                fillColor: Colors.white,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide(
+                                    color: AppTheme.border,
+                                  ),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return 'Nama kategori wajib diisi';
+                                }
+                                return null;
+                              },
+                            ),
 
-              TextFormField(
-                controller: nameController,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                  hintText: 'Example: Food & Drink',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFE5E5ED),
-                    ),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Nama kategori wajib diisi';
-                  }
-                  return null;
-                },
-              ),
+                            const SizedBox(height: 25),
 
-              const SizedBox(height: 25),
+                            // CHOOSE ICON
+                            const Text(
+                              'Choose Icon',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
 
-              // CHOOSE ICON
-              const Text(
-                'Choose Icon',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
-              ),
+                            const SizedBox(height: 12),
 
-              const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              children: availableIcons.entries.map((entry) {
+                                final selected = selectedIcon == entry.key;
 
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: availableIcons.entries.map((entry) {
-                  final selected = selectedIcon == entry.key;
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() => selectedIcon = entry.key);
+                                  },
+                                  child: Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? getColor(selectedColor)
+                                          : Colors.white,
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: selected
+                                            ? Colors.black
+                                            : const Color(0xFFE5E5ED),
+                                        width: selected ? 2 : 1,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      entry.value,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => selectedIcon = entry.key);
-                    },
-                    child: Container(
-                      width: 52,
-                      height: 52,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? getColor(selectedColor)
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: selected
-                              ? Colors.black
-                              : const Color(0xFFE5E5ED),
-                          width: selected ? 2 : 1,
+                            const SizedBox(height: 25),
+
+                            // CHOOSE COLOR
+                            const Text(
+                              'Choose Color',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            Wrap(
+                              spacing: 13,
+                              runSpacing: 13,
+                              children: availableColors.map((color) {
+                                final selected = selectedColor == color;
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    setState(() => selectedColor = color);
+                                  },
+                                  child: Container(
+                                    width: 42,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                      color: getColor(color),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: selected
+                                            ? Colors.black
+                                            : Colors.transparent,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: selected
+                                        ? const Icon(
+                                            Icons.check,
+                                            color: Colors.black,
+                                          )
+                                        : null,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+
+                            const SizedBox(height: 25),
+
+                            // IMPULSIVE CATEGORY
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: Border.all(
+                                  color: const Color(0xFFE5E5ED),
+                                ),
+                              ),
+                              child: SwitchListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: const Text(
+                                  'Impulsive Category',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                subtitle: const Text(
+                                  'Tandai kategori untuk pengeluaran impulsif',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                activeTrackColor: AppTheme.primary,
+                                value: isImpulsive,
+                                onChanged: (value) {
+                                  setState(() => isImpulsive = value);
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      child: Icon(
-                        entry.value,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 25),
-
-              // CHOOSE COLOR
-              const Text(
-                'Choose Color',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
+                    ],
+                  ),
                 ),
               ),
 
-              const SizedBox(height: 12),
-
-              Wrap(
-                spacing: 13,
-                runSpacing: 13,
-                children: availableColors.map((color) {
-                  final selected = selectedColor == color;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => selectedColor = color);
-                    },
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: BoxDecoration(
-                        color: getColor(color),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: selected
-                              ? Colors.black
-                              : Colors.transparent,
-                          width: 2,
+              // SAVE CATEGORY BUTTON
+              ColoredBox(
+                color: Colors.transparent,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: ElevatedButton(
+                      onPressed: isSaving ? null : saveCategory,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.black,
+                        disabledBackgroundColor: AppTheme.primary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
                         ),
                       ),
-                      child: selected
-                          ? const Icon(
-                              Icons.check,
-                              color: Colors.black,
+                      child: isSaving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.black,
+                                strokeWidth: 2.5,
+                              ),
                             )
-                          : null,
-                    ),
-                  );
-                }).toList(),
-              ),
-
-              const SizedBox(height: 25),
-
-              // IMPULSIVE CATEGORY
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFFE5E5ED),
-                  ),
-                ),
-                child: SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: const Text(
-                    'Impulsive Category',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
+                          : const Text(
+                              'Save Category',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                     ),
                   ),
-                  subtitle: const Text(
-                    'Tandai kategori untuk pengeluaran impulsif',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  activeTrackColor: const Color(0xFFB8E600),
-                  value: isImpulsive,
-                  onChanged: (value) {
-                    setState(() => isImpulsive = value);
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 35),
-
-              // SAVE BUTTON
-              SizedBox(
-                height: 54,
-                child: ElevatedButton(
-                  onPressed: isSaving ? null : saveCategory,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFB8E600),
-                    foregroundColor: Colors.black,
-                    disabledBackgroundColor: const Color(0xFFB8E600),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: isSaving
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.black,
-                            strokeWidth: 2.5,
-                          ),
-                        )
-                      : const Text(
-                          'Save Category',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
                 ),
               ),
             ],
