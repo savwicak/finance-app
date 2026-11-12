@@ -1,16 +1,54 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nvidiaapp/core/navigation/app_navigation.dart';
-import 'package:nvidiaapp/features/on_boarding/storage/onboarding_storage.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:nvidiaapp/features/auth/auth_gate.dart';
+import 'package:nvidiaapp/features/on_boarding/storage/onboarding_storage.dart';
 import 'package:nvidiaapp/features/on_boarding/controller/onboarding_controller.dart';
 import 'package:nvidiaapp/features/on_boarding/presentation/widget/onboarding_content.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class OnboardingScreen extends GetView<OnboardingController> {
   const OnboardingScreen({super.key});
+
+  final List<Map<String, String>> onboardingData = const [
+    {
+      'image': 'lib/assets/images/onboarding_image.png',
+      'title': 'Track Your Expenses',
+      'description':
+          'Keep track of your daily expenses and understand where your money goes.',
+    },
+    {
+      'image': 'lib/assets/images/onboarding_image.png',
+      'title': 'Manage Your Budget',
+      'description':
+          'Set spending limits, manage your budget, and stay in control of your finances.',
+    },
+    {
+      'image': 'lib/assets/images/onboarding_image.png',
+      'title': 'Reach Your Financial Goals',
+      'description':
+          'Build better financial habits and turn your saving goals into reality.',
+    },
+  ];
+
+  Future<void> _handleButton() async {
+    final isLastPage =
+        controller.currentPage.value == onboardingData.length - 1;
+
+    if (!isLastPage) {
+      controller.nextPage();
+      return;
+    }
+
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+
+    if (userId == null) return;
+
+    await OnboardingStorage.setCompleted(userId);
+
+    Get.offAll(() => const AuthGate());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,79 +74,48 @@ class OnboardingScreen extends GetView<OnboardingController> {
                 child: PageView.builder(
                   controller: controller.pageController,
                   onPageChanged: controller.onPageChanged,
-                  itemCount: controller.onboardingData.length,
+                  itemCount: onboardingData.length,
                   itemBuilder: (context, index) {
-                    final data = controller.onboardingData[index];
+                    final data = onboardingData[index];
 
                     return OnboardingContent(
-                      image: data["image"]!,
-                      title: data["title"]!,
-                      description: data["description"]!,
+                      image: data['image']!,
+                      title: data['title']!,
+                      description: data['description']!,
                     );
                   },
                 ),
               ),
 
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 30,
-                  vertical: 20,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Obx(
-                      () => TextButton(
-                        onPressed: controller.currentPage.value == 0
-                            ? null
-                            : controller.previousPage,
-                        child: const Text("Back"),
-                      ),
-                    ),
- 
-                    Obx(
-                      () => TextButton(
-                        onPressed: () {
-                          if (controller.currentPage.value ==
-                              controller.onboardingData.length - 1) {
-                            Get.offAll(() => const AppNavigation());
-                          } else {
-                            controller.nextPage();
-                          }
-                        },
-                        child: Text(
-                          controller.currentPage.value ==
-                                  controller.onboardingData.length - 1
-                              ? "Get Started"
-                              : "Next",
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: Obx(() {
+                    final isLastPage =
+                        controller.currentPage.value ==
+                            onboardingData.length - 1;
+
+                    return ElevatedButton(
+                      onPressed: _handleButton,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primary,
+                        foregroundColor: Colors.black,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
                       ),
-                    ),
-                    Obx(
-                      () => TextButton(
-                        onPressed: () async {
-                          if (controller.currentPage.value ==
-                              controller.onboardingData.length - 1) {
-                            final userId = Supabase.instance.client.auth.currentUser?.id;
-
-                            if (userId == null) return;
-
-                            await OnboardingStorage.setCompleted(userId);
-
-                            Get.offAll(() => const AuthGate());
-                          } else {
-                            controller.nextPage();
-                          }
-                        },
-                        child: Text(
-                          controller.currentPage.value ==
-                                  controller.onboardingData.length - 1
-                              ? "Get Started"
-                              : "Next",
+                      child: Text(
+                        isLastPage ? 'Get Started' : 'Next',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  }),
                 ),
               ),
             ],
