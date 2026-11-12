@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/app_routes.dart';
 import 'package:nvidiaapp/core/client/supabase_config.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
@@ -25,11 +26,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Finance App',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
       initialRoute: Routes.initial,
       getPages: Routes.pages,
     );

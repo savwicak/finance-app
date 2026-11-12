@@ -7,4 +7,15 @@ class AppTheme {
   static const Color border = Color(0xffE1E8F2);
 
   static const String fontFamily = 'HelveticaNeue';
+
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      fontFamily: fontFamily,
+      scaffoldBackgroundColor: background,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primary
+      )
+    );
+  }
 }
