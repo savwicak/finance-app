@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/navigation/app_navigation.dart';
-import 'package:nvidiaapp/core/storage/onboarding_storage.dart';
+import 'package:nvidiaapp/features/on_boarding/storage/onboarding_storage.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:nvidiaapp/features/auth/auth_gate.dart';
 import 'package:nvidiaapp/features/on_boarding/controller/onboarding_controller.dart';

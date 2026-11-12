@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:nvidiaapp/core/storage/onboarding_storage.dart';
+import 'package:nvidiaapp/features/on_boarding/storage/onboarding_storage.dart';
 import 'package:nvidiaapp/core/navigation/app_navigation.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:nvidiaapp/features/on_boarding/controller/onboarding_controller.dart';
