@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nvidiaapp/features/home/widgets/impulsive_calculator_button.dart';
 import '../../controllers/home_controller.dart';
 import '../../models/dashboard_models.dart';
 import '../../widgets/home_widgets.dart';
@@ -94,8 +95,8 @@ class HomeScreen extends StatelessWidget {
                   delegate: SliverChildListDelegate([
                     InsightCard(insight: controller.insight.value),
                     const SizedBox(height: 18),
-                    WeeklySpendingChart(transactions: data.transactions),
-                    const SizedBox(height: 22),
+                    ImpulsiveCalculatorButton(),
+                    SizedBox(height: 22,),
                     Row(
                       children: [
                         const Expanded(child: Text('Tabungan', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold))),

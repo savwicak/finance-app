@@ -12,7 +12,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontFamily,
-      scaffoldBackgroundColor: background,
+      scaffoldBackgroundColor: Colors.white,
       colorScheme: ColorScheme.fromSeed(
         seedColor: primary
       )
