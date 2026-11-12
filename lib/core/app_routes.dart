@@ -5,12 +5,11 @@ import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/register_screen.dart';
 import 'package:nvidiaapp/features/category/presentation/screen/category_screen.dart';
 import 'package:nvidiaapp/features/history/history_category_screen.dart';
-import 'package:nvidiaapp/features/history/history_general_screen.dart';
 import 'package:nvidiaapp/features/history/presentation/screens/history_general.dart';
 import 'package:nvidiaapp/features/home/presentation/screens/home_screen.dart';
-import 'package:nvidiaapp/features/impulsive_calculator/impulsive_calculator_screen.dart';
 import 'package:nvidiaapp/features/on_boarding/presentation/screens/on_boarding_screen.dart';
 import 'package:nvidiaapp/features/splash/splash_screen.dart';
+import 'package:nvidiaapp/features/impulse-calculator/presentation/screens/impulse_calculator_screen.dart';
 import 'package:nvidiaapp/features/wishlist/presentation/screen/savings_screen.dart';
 
 class Routes {
@@ -77,7 +76,7 @@ class Routes {
     ),
     GetPage(
       name: impulsiveCalculator,
-      page: () => const ImpulsiveCalculatorScreen(),
+      page: () => ImpulseCalculatorScreen(),
     ),
     GetPage(
       name: onBoarding,

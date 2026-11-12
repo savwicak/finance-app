@@ -18,7 +18,7 @@ class DashboardTransaction {
   });
 
   factory DashboardTransaction.fromMap(Map<String, dynamic> map) {
-    final rawDate = map['created_at'];
+    final rawDate = map['occurred_at'] ?? map['created_at'];
     return DashboardTransaction(
       id: map['id']?.toString() ?? '',
       title: (map['merchant'] ?? map['title'] ?? map['name'] ?? 'Transaksi').toString(),

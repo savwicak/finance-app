@@ -104,7 +104,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         backgroundColor: const Color(0xFFFFFCFC),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Get.back(),
+          onPressed: () => Get.offAllNamed('/auth-gate'),
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
         ),
         title: const Text(
