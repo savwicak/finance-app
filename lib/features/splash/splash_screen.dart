@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -33,14 +32,15 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.wallet_rounded,
-                color: Colors.white,
-                size: 64,
+              Image.asset(
+                'lib/assets/images/walee_icon.png',
+                width: 80,
+                height: 80,
+                fit: BoxFit.contain,
               ),
               const SizedBox(height: 10),
               const Text(
-                "Savy",
+                "Walee",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 48,

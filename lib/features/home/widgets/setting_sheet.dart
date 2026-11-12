@@ -1,9 +1,63 @@
-// setting_sheet.dart
 
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SettingSheet extends StatelessWidget {
   const SettingSheet({super.key});
+
+  // LOGOUT FUNCTION
+  Future<void> _logout(BuildContext context) async {
+    // Confirmation Dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text(
+          'Are you sure you want to logout from your account?',
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text(
+              'Logout',
+              style: TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await Supabase.instance.client.auth.signOut();
+
+      // AuthGate akan menangani navigasi ke Login.
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to logout: $e'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,14 +65,17 @@ class SettingSheet extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(30),
+        ),
       ),
       child: SafeArea(
         child: Column(
-          mainAxisSize: MainAxisSize.min, // Mengikuti tinggi konten
+          mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 12),
-            // Drag Handle
+
+            // DRAG HANDLE
             Container(
               width: 40,
               height: 4,
@@ -27,9 +84,10 @@ class SettingSheet extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
+
             const SizedBox(height: 16),
 
-            // Header (Title & Close Button) - Sesuai layout Row kamu
+            // HEADER
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
@@ -56,16 +114,17 @@ class SettingSheet extends StatelessWidget {
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
-            // Content
+            // CONTENT
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // --- SECTION: Account & Profile ---
+                    // ACCOUNT & PROFILE
                     _buildSectionTitle('Account & Profile'),
                     _buildItemGroup(
                       children: [
@@ -91,9 +150,10 @@ class SettingSheet extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 24),
 
-                    // --- SECTION: Preferences ---
+                    // PREFERENCES
                     _buildSectionTitle('Preferences'),
                     _buildItemGroup(
                       children: [
@@ -109,9 +169,10 @@ class SettingSheet extends StatelessWidget {
                         ),
                       ],
                     ),
+
                     const SizedBox(height: 24),
 
-                    // --- SECTION: Delete Account ---
+                    // DELETE ACCOUNT
                     _buildSectionTitle('Delete Account'),
                     _buildItemGroup(
                       children: [
@@ -123,7 +184,23 @@ class SettingSheet extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 32), // Spacing bawah
+
+                    const SizedBox(height: 24),
+
+                    // LOGOUT
+                    _buildSectionTitle('Session'),
+                    _buildItemGroup(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.logout_rounded,
+                          title: 'Logout',
+                          isDestructive: true,
+                          onTap: () => _logout(context),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -134,14 +211,14 @@ class SettingSheet extends StatelessWidget {
     );
   }
 
-  // Widget Helper: Judul Section
+  // SECTION TITLE
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         title,
         style: const TextStyle(
-          color: Color(0xFF9CA3AF), // Abu-abu terang
+          color: Color(0xFF9CA3AF),
           fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
@@ -149,11 +226,13 @@ class SettingSheet extends StatelessWidget {
     );
   }
 
-  // Widget Helper: Kotak Abu-abu Pembungkus Item
-  Widget _buildItemGroup({required List<Widget> children}) {
+  // ITEM GROUP
+  Widget _buildItemGroup({
+    required List<Widget> children,
+  }) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC), // Warna background abu-abu sangat muda
+        color: const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -162,7 +241,7 @@ class SettingSheet extends StatelessWidget {
     );
   }
 
-  // Widget Helper: Baris Menu (Menu Item)
+  // MENU ITEM
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
@@ -175,7 +254,10 @@ class SettingSheet extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         child: Row(
           children: [
             Icon(
