@@ -6,180 +6,469 @@ import 'package:nvidiaapp/features/home/controllers/home_controller.dart';
 class ImpulseCalculatorController extends GetxController {
   final supabase = Supabase.instance.client;
 
+  // CATEGORY
   final categories = <Map<String, dynamic>>[].obs;
+
+  // WISHLIST
+  final wishlist = <Map<String, dynamic>>[].obs;
+  final selectedWishlistId = Rxn<int>();
   final selectedCategoryId = Rxn<int>();
 
+  // ITEM
   final name = ''.obs;
   final price = 0.obs;
   final isOutOfPlan = true.obs;
 
+  // LOADING
   final isSaving = false.obs;
+  final isUpdatingCategory = false.obs;
+  final isLoading = false.obs;
 
+  // CALCULATION
   final balanceRemaining = 0.obs;
   final dailyFunds = 0.obs;
   final moneyDurability = 0.0.obs;
   final budgetRemainingAfterPurchase = 0.obs;
 
+  // PERIOD
+  int? activePeriodId;
   DateTime? periodStart;
   DateTime? periodEnd;
 
   HomeController get homeController => Get.find<HomeController>();
 
+  Worker? _summaryWorker;
+
+  String? get userId => supabase.auth.currentUser?.id;
+
+  @override
   @override
   void onInit() {
     super.onInit();
-    fetchCategories();
-    fetchPeriod();
+
+    _summaryWorker = ever(
+      homeController.summary,
+      (_) => calculate(),
+    );
+
+    Future.microtask(() {
+      loadInitialData();
+    });
   }
 
+  @override
+  void onClose() {
+    _summaryWorker?.dispose();
+    super.onClose();
+  }
+
+  // LOAD INITIAL DATA
+  Future<void> loadInitialData() async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      if (userId == null) {
+        Get.snackbar('Error', 'Silakan login terlebih dahulu.');
+        return;
+      }
+
+      await homeController.loadDashboard();
+
+      await Future.wait([
+        fetchCategories(),
+        fetchWishlist(),
+        fetchPeriod(),
+      ]);
+
+      calculate();
+    } catch (e) {
+      print('LOAD INITIAL DATA ERROR: $e');
+      Get.snackbar('Error', 'Gagal memuat kalkulator: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // FETCH CATEGORY
   Future<void> fetchCategories() async {
     try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) return;
+      final uid = userId;
+      if (uid == null) return;
 
       final response = await supabase
           .from('categories')
-          .select('id, name')
-          .eq('user_id', userId)
+          .select('id, name, is_archive, is_archived')
+          .eq('user_id', uid)
           .eq('is_archive', false)
+          .eq('is_archived', false)
           .order('sort_order');
 
       categories.assignAll(
         List<Map<String, dynamic>>.from(response),
       );
+
+      print('CATEGORY LOADED: ${categories.length}');
     } catch (e) {
+      print('FETCH CATEGORY ERROR: $e');
       Get.snackbar('Error', 'Gagal mengambil kategori: $e');
     }
   }
 
-  Future<void> fetchPeriod() async {
-    try {
-      final userId = supabase.auth.currentUser?.id;
-      if (userId == null) return;
+  // CATEGORY NAME
+  String get selectedCategoryName {
+    final id = selectedCategoryId.value;
 
-      final today = DateTime.now();
-      final date = today.toIso8601String().split('T')[0];
+    if (id == null) return '-';
+
+    for (final category in categories) {
+      final categoryId = (category['id'] as num?)?.toInt();
+
+      if (categoryId == id) {
+        return category['name']?.toString() ?? '-';
+      }
+    }
+
+    return '-';
+  }
+
+  // FETCH WISHLIST
+  Future<void> fetchWishlist() async {
+    try {
+      final uid = userId;
+      if (uid == null) return;
 
       final response = await supabase
-          .from('periods')
-          .select('id, start_date, end_date')
-          .eq('user_id', userId)
-          .lte('start_date', date)
-          .gte('end_date', date)
-          .order('start_date', ascending: false)
-          .limit(1);
+          .from('savings_goals')
+          .select(
+            'id, name, target_amount, category_id, is_out_of_plan',
+          )
+          .eq('user_id', uid)
+          .order('created_at', ascending: false);
 
-      if (response.isNotEmpty) {
-        periodStart = DateTime.parse(response.first['start_date']);
-        periodEnd = DateTime.parse(response.first['end_date']);
-      }
+      wishlist.assignAll(
+        List<Map<String, dynamic>>.from(response),
+      );
 
-      calculate();
+      print('WISHLIST LOADED: ${wishlist.length}');
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengambil periode: $e');
+      print('FETCH WISHLIST ERROR: $e');
+      Get.snackbar('Error', 'Gagal mengambil Wishlist: $e');
     }
   }
 
-  void updateName(String value) {
-    name.value = value;
-  }
+  // SELECT WISHLIST
+  void updateWishlist(int? value) {
+    selectedWishlistId.value = value;
 
-  void updatePrice(String value) {
-    price.value = int.tryParse(
-          value.replaceAll('.', '').replaceAll(',', '').trim(),
-        ) ??
-        0;
+    if (value == null) {
+      name.value = '';
+      price.value = 0;
+      selectedCategoryId.value = null;
+      isOutOfPlan.value = true;
+
+      calculate();
+      return;
+    }
+
+    Map<String, dynamic>? selected;
+
+    for (final item in wishlist) {
+      if ((item['id'] as num?)?.toInt() == value) {
+        selected = item;
+        break;
+      }
+    }
+
+    if (selected == null) return;
+
+    name.value = selected['name']?.toString() ?? '';
+
+    price.value =
+        (selected['target_amount'] as num?)?.toInt() ?? 0;
+
+    selectedCategoryId.value =
+        (selected['category_id'] as num?)?.toInt();
+
+    isOutOfPlan.value =
+        selected['is_out_of_plan'] as bool? ?? true;
+
     calculate();
+
+    print('SELECTED WISHLIST: ${name.value}');
+    print('SELECTED CATEGORY: ${selectedCategoryId.value}');
   }
 
-  void updateCategory(int? value) {
-    selectedCategoryId.value = value;
+  // UPDATE CATEGORY
+  Future<void> updateCategory(int? value) async {
+    if (value == null) return;
+
+    final wishlistId = selectedWishlistId.value;
+    final uid = userId;
+
+    if (wishlistId == null || uid == null) {
+      Get.snackbar('Error', 'Pilih Wishlist terlebih dahulu.');
+      return;
+    }
+
+    final categoryExists = categories.any(
+      (item) => (item['id'] as num).toInt() == value,
+    );
+
+    if (!categoryExists) {
+      Get.snackbar('Error', 'Kategori tidak ditemukan.');
+      return;
+    }
+
+    isUpdatingCategory.value = true;
+
+    try {
+      await supabase
+          .from('savings_goals')
+          .update({'category_id': value})
+          .eq('id', wishlistId)
+          .eq('user_id', uid);
+
+      selectedCategoryId.value = value;
+
+      final index = wishlist.indexWhere(
+        (item) => (item['id'] as num).toInt() == wishlistId,
+      );
+
+      if (index != -1) {
+        wishlist[index]['category_id'] = value;
+        wishlist.refresh();
+      }
+
+      calculate();
+
+      Get.snackbar(
+        'Berhasil',
+        'Kategori berhasil disimpan ke Wishlist.',
+      );
+
+      print('CATEGORY UPDATED: $value');
+    } catch (e) {
+      print('UPDATE CATEGORY ERROR: $e');
+
+      Get.snackbar(
+        'Gagal',
+        'Tidak dapat menyimpan kategori: $e',
+      );
+    } finally {
+      isUpdatingCategory.value = false;
+    }
   }
 
+  // UPDATE OUT OF PLAN
   void updateOutOfPlan(bool value) {
     isOutOfPlan.value = value;
     calculate();
   }
 
+  // FETCH ACTIVE PERIOD
+  Future<void> fetchPeriod() async {
+    try {
+      final uid = userId;
+
+      if (uid == null) {
+        activePeriodId = null;
+        return;
+      }
+
+      final today = DateTime.now().toIso8601String().split('T')[0];
+
+      final response = await supabase
+          .from('periods')
+          .select('id, start_date, end_date, allowance')
+          .eq('user_id', uid)
+          .lte('start_date', today)
+          .gte('end_date', today)
+          .isFilter('closed_at', null)
+          .order('start_date', ascending: false)
+          .limit(1);
+
+      if (response.isEmpty) {
+        activePeriodId = null;
+        periodStart = null;
+        periodEnd = null;
+
+        print('ACTIVE PERIOD NOT FOUND: $today');
+        return;
+      }
+
+      final period = response.first;
+
+      activePeriodId = (period['id'] as num).toInt();
+
+      periodStart = DateTime.parse(
+        period['start_date'].toString(),
+      );
+
+      periodEnd = DateTime.parse(
+        period['end_date'].toString(),
+      );
+
+      print('ACTIVE PERIOD ID: $activePeriodId');
+    } catch (e) {
+      print('FETCH PERIOD ERROR: $e');
+      Get.snackbar('Error', 'Gagal mengambil periode: $e');
+    }
+  }
+
+  // CALCULATE
   void calculate() {
     final summary = homeController.summary.value;
 
-    if (summary == null) return;
+    if (summary == null) {
+      balanceRemaining.value = 0;
+      dailyFunds.value = 0;
+      moneyDurability.value = 0;
+      budgetRemainingAfterPurchase.value = 0;
+      return;
+    }
 
-    final currentBalance = summary.balance;
-    final remainingBudget = summary.remainingBudget;
+    final currentBalance =
+        (summary.balance as num).toInt();
 
-    // Saldo setelah pembelian.
-    balanceRemaining.value = currentBalance - price.value;
+    final remainingBudget =
+        (summary.remainingBudget as num).toInt();
 
-    // Anggaran tersisa setelah simulasi pembelian.
-    budgetRemainingAfterPurchase.value = isOutOfPlan.value
-        ? remainingBudget
-        : remainingBudget - price.value;
+    final monthlyExpense =
+        (summary.monthlyExpense as num).toDouble();
 
-    // Hitung sisa hari periode aktif.
+    final itemPrice = price.value;
+
+    // BALANCE AFTER PURCHASE
+    balanceRemaining.value = currentBalance - itemPrice;
+
+    // BUDGET AFTER PURCHASE
+    budgetRemainingAfterPurchase.value =
+        isOutOfPlan.value
+            ? remainingBudget
+            : remainingBudget - itemPrice;
+
+    // REMAINING PERIOD DAYS
     final today = DateTime.now();
+
+    final currentDate = DateTime(
+      today.year,
+      today.month,
+      today.day,
+    );
 
     int remainingDays;
 
     if (periodEnd != null) {
-      final end = DateTime(
+      final endDate = DateTime(
         periodEnd!.year,
         periodEnd!.month,
         periodEnd!.day,
       );
 
-      final current = DateTime(today.year, today.month, today.day);
-
-      remainingDays = end.difference(current).inDays + 1;
-      if (remainingDays < 1) remainingDays = 1;
+      remainingDays = endDate.difference(currentDate).inDays + 1;
     } else {
-      // Fallback jika belum ada periode aktif.
-      final lastDay = DateTime(today.year, today.month + 1, 0).day;
+      final lastDay = DateTime(
+        today.year,
+        today.month + 1,
+        0,
+      ).day;
+
       remainingDays = lastDay - today.day + 1;
     }
 
-    dailyFunds.value =
-        (budgetRemainingAfterPurchase.value / remainingDays).floor();
+    if (remainingDays < 1) remainingDays = 1;
 
-    // Hitung rata-rata pengeluaran harian aktual.
-    final firstDay = DateTime(today.year, today.month, 1);
-    final elapsedDays = today.difference(firstDay).inDays + 1;
+    // DAILY FUNDS
+    dailyFunds.value = (
+      budgetRemainingAfterPurchase.value / remainingDays
+    ).floor();
 
-    final averageDailyExpense =
-        summary.monthlyExpense / elapsedDays;
+    // AVERAGE DAILY EXPENSE
+    final startDate = periodStart != null
+        ? DateTime(
+            periodStart!.year,
+            periodStart!.month,
+            periodStart!.day,
+          )
+        : DateTime(today.year, today.month, 1);
 
+    int elapsedDays = currentDate.difference(startDate).inDays + 1;
+
+    if (elapsedDays < 1) elapsedDays = 1;
+
+    final averageDailyExpense = monthlyExpense / elapsedDays;
+
+    // MONEY DURABILITY
     if (averageDailyExpense > 0) {
       moneyDurability.value =
           balanceRemaining.value / averageDailyExpense;
     } else {
       moneyDurability.value = 0;
     }
+
+    print('===== IMPULSE CALCULATION =====');
+    print('Balance: $currentBalance');
+    print('Price: $itemPrice');
+    print('Remaining Balance: ${balanceRemaining.value}');
+    print('Remaining Budget: $remainingBudget');
+    print('Budget After Purchase: ${budgetRemainingAfterPurchase.value}');
+    print('Remaining Days: $remainingDays');
+    print('Daily Funds: ${dailyFunds.value}');
+    print('Average Daily Expense: $averageDailyExpense');
+    print('Money Durability: ${moneyDurability.value}');
   }
 
+  // BUY ANYWAY
   Future<void> buyAnyway() async {
-    if (name.value.trim().isEmpty) {
-      Get.snackbar('Input belum lengkap', 'Masukkan nama barang.');
+    if (selectedWishlistId.value == null) {
+      Get.snackbar(
+        'Input belum lengkap',
+        'Pilih barang dari Wishlist terlebih dahulu.',
+      );
       return;
     }
 
     if (price.value <= 0) {
-      Get.snackbar('Input belum lengkap', 'Masukkan harga barang.');
+      Get.snackbar(
+        'Input belum lengkap',
+        'Harga barang tidak valid.',
+      );
       return;
     }
 
-    final userId = supabase.auth.currentUser?.id;
+    if (selectedCategoryId.value == null) {
+      Get.snackbar(
+        'Input belum lengkap',
+        'Pilih kategori barang terlebih dahulu.',
+      );
+      return;
+    }
 
-    if (userId == null) {
+    if (activePeriodId == null) {
+      Get.snackbar(
+        'Periode tidak ditemukan',
+        'Pastikan kamu memiliki periode aktif.',
+      );
+      return;
+    }
+
+    final uid = userId;
+
+    if (uid == null) {
       Get.snackbar('Error', 'Silakan login terlebih dahulu.');
       return;
     }
+
+    if (isSaving.value) return;
 
     isSaving.value = true;
 
     try {
       await supabase.from('transactions').insert({
-        'user_id': userId,
+        'user_id': uid,
+        'period_id': activePeriodId,
         'category_id': selectedCategoryId.value,
         'type': 'expense',
         'amount': price.value,
@@ -189,7 +478,6 @@ class ImpulseCalculatorController extends GetxController {
         'source': 'manual',
       });
 
-      // Ambil data Home terbaru setelah transaksi tersimpan.
       await homeController.loadDashboard();
 
       calculate();
@@ -201,7 +489,13 @@ class ImpulseCalculatorController extends GetxController {
         'Transaksi berhasil ditambahkan.',
       );
     } catch (e) {
-      Get.snackbar('Gagal menyimpan transaksi', e.toString());
+      print('BUY ANYWAY ERROR: $e');
+
+      Get.snackbar(
+        'Gagal menyimpan transaksi',
+        e.toString(),
+        duration: const Duration(seconds: 8),
+      );
     } finally {
       isSaving.value = false;
     }

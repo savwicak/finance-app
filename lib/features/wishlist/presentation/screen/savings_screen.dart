@@ -11,8 +11,8 @@ class SavingsScreen extends StatelessWidget {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController targetController = TextEditingController();
 
-  String formatRupiah(int amount) {
-    return 'Rp ${amount.toString().replaceAllMapped(
+  String formatRupiah(num amount) {
+    return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(
       RegExp(r'\B(?=(\d{3})+(?!\d))'),
       (match) => '.',
     )}';
