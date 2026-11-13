@@ -26,6 +26,12 @@ class HistoryGeneralController extends GetxController {
     'This Week',
   ];
 
+  @override
+  void onReady() {
+    super.onReady();
+    fetchTransactions();
+  }
+
   List<String> get methods {
     final values = transactions
         .map((item) => item.method)
