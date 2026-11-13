@@ -81,58 +81,35 @@ class SavingsController extends GetxController {
   Future<bool> addGoal({
     required String name,
     required int targetAmount,
+    int? categoryId,
     DateTime? dueDate,
+    bool isOutOfPlan = false,
+    bool isDone = false,
   }) async {
     try {
-      if (name.trim().isEmpty || targetAmount <= 0) {
-        Get.snackbar('Error', 'Nama dan target tabungan harus valid');
+      final uid = supabase.auth.currentUser?.id;
+
+      if (uid == null) {
+        Get.snackbar('Error', 'User belum login');
         return false;
       }
 
       await supabase.from('savings_goals').insert({
-        'user_id': userId,
+        'user_id': uid,
         'name': name.trim(),
         'target_amount': targetAmount,
+        'category_id': categoryId,
         'due_date': dueDate?.toIso8601String().split('T').first,
+        'is_out_of_plan': isOutOfPlan,
+        'is_done': isDone,
       });
 
       await fetchGoals();
 
-      Get.snackbar('Berhasil', 'Target tabungan berhasil ditambahkan');
+      Get.snackbar('Berhasil', 'Wishlist berhasil ditambahkan');
       return true;
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menambahkan target: $e');
-      return false;
-    }
-  }
-
-  // ADD SAVINGS ENTRY
-  Future<bool> addEntry({
-    required int goalId,
-    required int amount,
-    int? periodId,
-    String? note,
-  }) async {
-    try {
-      if (amount <= 0) {
-        Get.snackbar('Error', 'Nominal harus lebih dari 0');
-        return false;
-      }
-
-      await supabase.from('savings_entries').insert({
-        'user_id': userId,
-        'goal_id': goalId,
-        'period_id': periodId,
-        'amount': amount,
-        'note': note,
-      });
-
-      await fetchEntries();
-
-      Get.snackbar('Berhasil', 'Tabungan berhasil ditambahkan');
-      return true;
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal menambahkan tabungan: $e');
+      Get.snackbar('Error', 'Gagal menambahkan wishlist: $e');
       return false;
     }
   }

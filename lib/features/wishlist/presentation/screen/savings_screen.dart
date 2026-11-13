@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
-// Hapus import widget home_widgets.dart jika memang tidak dipakai di screen ini
 import 'package:nvidiaapp/features/wishlist/controller/savings_controller.dart';
+import 'package:nvidiaapp/features/category/controllers/category_controller.dart';
 
 class SavingsScreen extends StatelessWidget {
   SavingsScreen({super.key});
 
   final SavingsController controller = Get.put(SavingsController());
+  final CategoryController categoryController = Get.put(CategoryController());
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController targetController = TextEditingController();
@@ -20,87 +21,217 @@ class SavingsScreen extends StatelessWidget {
     nameController.clear();
     targetController.clear();
 
+    int? selectedCategoryId;
+    DateTime? selectedDate;
+    bool isOutOfPlan = false;
+    bool isDone = false;
+
     Get.dialog(
-      AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Add Savings Goal',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                hintText: 'Savings name',
-                filled: true,
-                fillColor: const Color(0xFFF8F6F7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      StatefulBuilder(
+        builder: (context, setDialogState) {
+          final categories = categoryController.categories;
+
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+            title: const Text(
+              'Add Wishlist',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            content: SizedBox(
+              width: 380,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Nama barang wishlist',
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    TextField(
+                      controller: targetController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Target harga',
+                        prefixText: 'Rp ',
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // CATEGORY DROPDOWN
+                    DropdownButtonFormField<int>(
+                      value: selectedCategoryId,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        hintText: 'Pilih kategori',
+                        filled: true,
+                        fillColor: const Color(0xFFF8F6F7),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      items: categories.map((category) {
+                        final id = (category['id'] as num).toInt();
+
+                        return DropdownMenuItem<int>(
+                          value: id,
+                          child: Text(
+                            category['name']?.toString() ?? '',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          selectedCategoryId = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 14),
+
+                    // DATE PICKER
+                    InkWell(
+                      borderRadius: BorderRadius.circular(12),
+                      onTap: () async {
+                        final picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate ?? DateTime.now(),
+                          firstDate: DateTime.now(),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (picked != null) {
+                          setDialogState(() {
+                            selectedDate = picked;
+                          });
+                        }
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 18,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F6F7),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.calendar_month,
+                              color: Colors.black54,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                selectedDate == null
+                                    ? 'Pilih tanggal target'
+                                    : '${selectedDate!.day.toString().padLeft(2, '0')}/'
+                                      '${selectedDate!.month.toString().padLeft(2, '0')}/'
+                                      '${selectedDate!.year}',
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black54,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Out of Plan'),
+                      value: isOutOfPlan,
+                      activeColor: const Color(0xFFB8E600),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          isOutOfPlan = value ?? false;
+                        });
+                      },
+                    ),
+
+                    CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Wishlist sudah terpenuhi'),
+                      value: isDone,
+                      activeColor: const Color(0xFFB8E600),
+                      onChanged: (value) {
+                        setDialogState(() {
+                          isDone = value ?? false;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: targetController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'Target amount',
-                prefixText: 'Rp ',
-                filled: true,
-                fillColor: const Color(0xFFF8F6F7),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('Cancel'),
               ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFB8E600),
-              foregroundColor: Colors.black,
-            ),
-            onPressed: () async {
-              final name = nameController.text.trim();
-              final target = int.tryParse(targetController.text.trim());
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFB8E600),
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: () async {
+                  final name = nameController.text.trim();
+                  final target = int.tryParse(
+                    targetController.text.trim(),
+                  );
 
-              if (name.isEmpty || target == null || target <= 0) {
-                Get.snackbar(
-                  'Invalid Input',
-                  'Isi nama dan target tabungan dengan benar.',
-                  snackPosition: SnackPosition.TOP,
-                  backgroundColor: Colors.redAccent,
-                  colorText: Colors.white,
-                  margin: const EdgeInsets.all(15),
-                  borderRadius: 12,
-                  duration: const Duration(seconds: 2),
-                  icon: const Icon(Icons.error, color: Colors.white),
-                );
-                return;
-              }
+                  if (name.isEmpty || target == null || target <= 0) {
+                    Get.snackbar(
+                      'Invalid Input',
+                      'Isi nama barang dan target harga dengan benar.',
+                    );
+                    return;
+                  }
 
-              final success = await controller.addGoal(
-                name: name,
-                targetAmount: target,
-              );
+                  final success = await controller.addGoal(
+                    name: name,
+                    targetAmount: target,
+                    categoryId: selectedCategoryId,
+                    dueDate: selectedDate,
+                    isOutOfPlan: isOutOfPlan,
+                    isDone: isDone,
+                  );
 
-              if (success) {
-                Get.back();
-              }
-            },
-            child: const Text('Save'),
-          ),
-        ],
+                  if (success) {
+                    Get.back(closeOverlays: true);
+                  }
+                },
+                child: const Text('Save Wishlist'),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
-
   // Tipe data goalId diubah menjadi int
   void showDepositDialog(int goalId, String goalName) {
     final TextEditingController depositController = TextEditingController();
