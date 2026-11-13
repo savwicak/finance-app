@@ -190,6 +190,35 @@ class ImpulseCalculatorScreen extends StatelessWidget {
 
                       const SizedBox(height: 20),
 
+
+                      const Text('Payment Method'),
+                      const SizedBox(height: 8),
+
+                      Obx(() {
+                        return DropdownButtonFormField<String>(
+                          value: controller.selectedMethod.value,
+                          isExpanded: true,
+                          menuMaxHeight: 300,
+                          decoration: inputDecoration('Pilih metode pembayaran'),
+                          hint: const Text('Pilih metode pembayaran'),
+                          items: controller.paymentMethods.map((method) {
+                            return DropdownMenuItem<String>(
+                              value: method['value'],
+                              child: Text(
+                                method['label']!,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              controller.selectedMethod.value = value;
+                            }
+                          },
+                        );
+                      }),
+                      const SizedBox(height: 20),
+
                       // OUT OF PLAN
                       Obx(
                         () => CheckboxListTile(

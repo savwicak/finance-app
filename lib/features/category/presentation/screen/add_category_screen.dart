@@ -73,7 +73,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     setState(() => isSaving = false);
 
     if (success) {
-      Get.offNamed('/category');
+      Get.back(closeOverlays: true);
 
       Get.snackbar(
         'Success!',

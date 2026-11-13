@@ -1,4 +1,3 @@
-
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:nvidiaapp/features/home/controllers/home_controller.dart';
@@ -29,11 +28,15 @@ class ImpulseCalculatorController extends GetxController {
   final dailyFunds = 0.obs;
   final moneyDurability = 0.0.obs;
   final budgetRemainingAfterPurchase = 0.obs;
+  // PAYMENT METHOD
+  final selectedMethod = 'tunai'.obs;
 
-  // PERIOD
-  int? activePeriodId;
-  DateTime? periodStart;
-  DateTime? periodEnd;
+  final paymentMethods = [
+    {'label': 'Tunai', 'value': 'tunai'},
+    {'label': 'QRIS', 'value': 'qris'},
+    {'label': 'E-Wallet', 'value': 'ewallet'},
+    {'label': 'Transfer', 'value': 'transfer'},
+  ];
 
   HomeController get homeController => Get.find<HomeController>();
 
@@ -41,7 +44,6 @@ class ImpulseCalculatorController extends GetxController {
 
   String? get userId => supabase.auth.currentUser?.id;
 
-  @override
   @override
   void onInit() {
     super.onInit();
@@ -79,7 +81,6 @@ class ImpulseCalculatorController extends GetxController {
       await Future.wait([
         fetchCategories(),
         fetchWishlist(),
-        fetchPeriod(),
       ]);
 
       calculate();
@@ -267,56 +268,6 @@ class ImpulseCalculatorController extends GetxController {
     calculate();
   }
 
-  // FETCH ACTIVE PERIOD
-  Future<void> fetchPeriod() async {
-    try {
-      final uid = userId;
-
-      if (uid == null) {
-        activePeriodId = null;
-        return;
-      }
-
-      final today = DateTime.now().toIso8601String().split('T')[0];
-
-      final response = await supabase
-          .from('periods')
-          .select('id, start_date, end_date, allowance')
-          .eq('user_id', uid)
-          .lte('start_date', today)
-          .gte('end_date', today)
-          .isFilter('closed_at', null)
-          .order('start_date', ascending: false)
-          .limit(1);
-
-      if (response.isEmpty) {
-        activePeriodId = null;
-        periodStart = null;
-        periodEnd = null;
-
-        print('ACTIVE PERIOD NOT FOUND: $today');
-        return;
-      }
-
-      final period = response.first;
-
-      activePeriodId = (period['id'] as num).toInt();
-
-      periodStart = DateTime.parse(
-        period['start_date'].toString(),
-      );
-
-      periodEnd = DateTime.parse(
-        period['end_date'].toString(),
-      );
-
-      print('ACTIVE PERIOD ID: $activePeriodId');
-    } catch (e) {
-      print('FETCH PERIOD ERROR: $e');
-      Get.snackbar('Error', 'Gagal mengambil periode: $e');
-    }
-  }
-
   // CALCULATE
   void calculate() {
     final summary = homeController.summary.value;
@@ -349,7 +300,7 @@ class ImpulseCalculatorController extends GetxController {
             ? remainingBudget
             : remainingBudget - itemPrice;
 
-    // REMAINING PERIOD DAYS
+    // REMAINING DAYS UNTIL END OF MONTH
     final today = DateTime.now();
 
     final currentDate = DateTime(
@@ -358,25 +309,13 @@ class ImpulseCalculatorController extends GetxController {
       today.day,
     );
 
-    int remainingDays;
+    final lastDay = DateTime(
+      today.year,
+      today.month + 1,
+      0,
+    ).day;
 
-    if (periodEnd != null) {
-      final endDate = DateTime(
-        periodEnd!.year,
-        periodEnd!.month,
-        periodEnd!.day,
-      );
-
-      remainingDays = endDate.difference(currentDate).inDays + 1;
-    } else {
-      final lastDay = DateTime(
-        today.year,
-        today.month + 1,
-        0,
-      ).day;
-
-      remainingDays = lastDay - today.day + 1;
-    }
+    int remainingDays = lastDay - today.day + 1;
 
     if (remainingDays < 1) remainingDays = 1;
 
@@ -386,19 +325,19 @@ class ImpulseCalculatorController extends GetxController {
     ).floor();
 
     // AVERAGE DAILY EXPENSE
-    final startDate = periodStart != null
-        ? DateTime(
-            periodStart!.year,
-            periodStart!.month,
-            periodStart!.day,
-          )
-        : DateTime(today.year, today.month, 1);
+    final startDate = DateTime(
+      today.year,
+      today.month,
+      1,
+    );
 
-    int elapsedDays = currentDate.difference(startDate).inDays + 1;
+    int elapsedDays =
+        currentDate.difference(startDate).inDays + 1;
 
     if (elapsedDays < 1) elapsedDays = 1;
 
-    final averageDailyExpense = monthlyExpense / elapsedDays;
+    final averageDailyExpense =
+        monthlyExpense / elapsedDays;
 
     // MONEY DURABILITY
     if (averageDailyExpense > 0) {
@@ -407,17 +346,6 @@ class ImpulseCalculatorController extends GetxController {
     } else {
       moneyDurability.value = 0;
     }
-
-    print('===== IMPULSE CALCULATION =====');
-    print('Balance: $currentBalance');
-    print('Price: $itemPrice');
-    print('Remaining Balance: ${balanceRemaining.value}');
-    print('Remaining Budget: $remainingBudget');
-    print('Budget After Purchase: ${budgetRemainingAfterPurchase.value}');
-    print('Remaining Days: $remainingDays');
-    print('Daily Funds: ${dailyFunds.value}');
-    print('Average Daily Expense: $averageDailyExpense');
-    print('Money Durability: ${moneyDurability.value}');
   }
 
   // BUY ANYWAY
@@ -446,14 +374,6 @@ class ImpulseCalculatorController extends GetxController {
       return;
     }
 
-    if (activePeriodId == null) {
-      Get.snackbar(
-        'Periode tidak ditemukan',
-        'Pastikan kamu memiliki periode aktif.',
-      );
-      return;
-    }
-
     final uid = userId;
 
     if (uid == null) {
@@ -468,11 +388,10 @@ class ImpulseCalculatorController extends GetxController {
     try {
       await supabase.from('transactions').insert({
         'user_id': uid,
-        'period_id': activePeriodId,
         'category_id': selectedCategoryId.value,
         'type': 'expense',
         'amount': price.value,
-        'method': 'manual',
+        'method': selectedMethod.value,
         'note': name.value.trim(),
         'occurred_at': DateTime.now().toUtc().toIso8601String(),
         'source': 'manual',
