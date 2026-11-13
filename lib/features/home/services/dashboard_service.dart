@@ -218,4 +218,19 @@ class DashboardService {
       goals: goals.take(3).toList(),
     );
   }
+
+  // DELETE SAVING GOAL
+  Future<void> deleteGoal({required String goalId}) async {
+    final userId = _client.auth.currentUser?.id;
+
+    if (userId == null) {
+      throw Exception('User belum login.');
+    }
+
+    await _client
+        .from(goalsTable)
+        .delete()
+        .eq('id', goalId)
+        .eq('user_id', userId);
+  }
 }

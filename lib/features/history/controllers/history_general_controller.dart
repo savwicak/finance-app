@@ -1,10 +1,10 @@
 
 import 'dart:io';
-import 'package:cross_file/cross_file.dart';
+// import 'package:cross_file/cross_file.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
+// import 'package:share_plus/share_plus.dart';
 
 import '../models/transaction_model.dart';
 import '../repositories/history_general_repository.dart';
@@ -230,12 +230,12 @@ class HistoryGeneralController extends GetxController {
 
       await file.writeAsString(csv);
 
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text: 'Finance Transaction History',
-        ),
-      );
+      // await SharePlus.instance.share(
+      //   ShareParams(
+      //     files: [XFile(file.path)],
+      //     text: 'Finance Transaction History',
+      //   ),
+      // );
     } catch (e) {
       Get.snackbar('Error', 'Gagal export transaksi: $e');
     }

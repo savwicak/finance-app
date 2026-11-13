@@ -1,5 +1,5 @@
+
 import 'package:flutter/material.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:get/get.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:nvidiaapp/features/category/presentation/widgets/category_card.dart';
@@ -13,6 +13,56 @@ class CategoryScreen extends StatelessWidget {
   final CategoryController controller = Get.put(CategoryController());
   final TextEditingController searchController = TextEditingController();
 
+  // CONFIRM DELETE CATEGORY
+  Future<void> _confirmDeleteCategory(
+    BuildContext context,
+    Map<String, dynamic> category,
+  ) async {
+    // Prevent deleting default categories
+    if (category['is_default'] == true) {
+      Get.snackbar(
+        'Cannot Delete',
+        'Kategori default tidak dapat dihapus.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(15),
+        borderRadius: 12,
+        duration: const Duration(seconds: 2),
+        icon: const Icon(Icons.error, color: Colors.white),
+      );
+      return;
+    }
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Category?'),
+        content: Text(
+          'Yakin ingin menghapus "${category['name']}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await controller.deleteCategory(category);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,13 +71,19 @@ class CategoryScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 12),
-            Center(
+
+            const Center(
               child: Text(
                 'Categories',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-            SizedBox(height: 12),
+
+            const SizedBox(height: 12),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -61,16 +117,23 @@ class CategoryScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+
                   const SizedBox(width: 10),
+
                   ElevatedButton.icon(
                     onPressed: () async {
-                      final result = await Get.to(() => AddCategoryScreen());
+                      final result = await Get.to(
+                        () => AddCategoryScreen(),
+                      );
 
                       if (result == true) {
                         controller.fetchCategories();
                       }
                     },
-                    icon: const Icon(Icons.add, color: Colors.black),
+                    icon: const Icon(
+                      Icons.add,
+                      color: Colors.black,
+                    ),
                     label: const Text(
                       'Add',
                       style: TextStyle(
@@ -99,65 +162,37 @@ class CategoryScreen extends StatelessWidget {
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
                 }
 
                 final items = controller.filteredCategories;
 
                 if (items.isEmpty) {
-                  return const Center(child: Text('Belum ada kategori'));
+                  return const Center(
+                    child: Text('Belum ada kategori'),
+                  );
                 }
 
                 return RefreshIndicator(
                   onRefresh: controller.fetchCategories,
                   child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final category = items[index];
 
-                      return Slidable(
-                        key: ValueKey(category['id']),
-                        enabled: category['is_default'] != true,
-                        endActionPane: ActionPane(
-                          motion: const BehindMotion(),
-                          extentRatio: 0.28,
-                          children: [
-                            SlidableAction(
-                              onPressed: (_) async {
-                                final confirm = await Get.dialog<bool>(
-                                  AlertDialog(
-                                    title: const Text('Delete Category?'),
-                                    content: Text(
-                                      'Yakin ingin menghapus "${category['name']}"?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Get.back(result: false),
-                                        child: const Text('Cancel'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () => Get.back(result: true),
-                                        child: const Text('Delete'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-
-                                if (confirm == true) {
-                                  await controller.deleteCategory(category);
-                                }
-                              },
-                              backgroundColor: Colors.red,
-                              foregroundColor: Colors.white,
-                              icon: Icons.delete_outline,
-                              label: 'Delete',
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                          ],
-                        ),
-                        child: CategoryCard(category: category),
+                      return CategoryCard(
+                        category: category,
+                        onDelete: () {
+                          _confirmDeleteCategory(
+                            context,
+                            category,
+                          );
+                        },
                       );
                     },
                   ),

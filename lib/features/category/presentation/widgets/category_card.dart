@@ -4,11 +4,13 @@ import 'package:nvidiaapp/core/theme/app_theme.dart';
 class CategoryCard extends StatelessWidget {
   final Map<String, dynamic> category;
   final VoidCallback? onTap;
+  final VoidCallback? onDelete;
 
   const CategoryCard({
     super.key,
     required this.category,
     this.onTap,
+    this.onDelete,
   });
 
   Color parseColor(String? value) {
@@ -54,66 +56,90 @@ class CategoryCard extends StatelessWidget {
           border: Border.all(color: const Color(0xFFE5E5ED)),
         ),
         child: Stack(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  parseIcon(category['icon']),
-                  color: color,
-                  size: 25,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    category['name'] ?? 'Untitled',
-                    style: const TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 13,
-                  vertical: 5,
-                ),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF292525),
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  '0% out of total',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-            const Positioned(
-              right: 0,
-              bottom: 0,
-              child: CircleAvatar(
-                radius: 19,
-                backgroundColor: AppTheme.primary,
-                child: Icon(
-                  Icons.north_east,
-                  color: Colors.white,
-                  size: 21,
-                ),
-              ),
-            ),
-          ],
+  children: [
+    Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          parseIcon(category['icon']),
+          color: color,
+          size: 25,
         ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            category['name'] ?? 'Untitled',
+            style: const TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+      ],
+    ),
+
+    // Delete button - bottom left
+    Positioned(
+      left: -8,
+      bottom: -8,
+      child: IconButton(
+        onPressed: onDelete,
+        icon: const Icon(
+          Icons.delete_outline,
+          size: 21,
+        ),
+        color: Colors.redAccent,
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(
+          minWidth: 32,
+          minHeight: 32,
+        ),
+        tooltip: 'Delete category',
+      ),
+    ),
+
+    // Percentage badge - original position
+    Positioned(
+      top: 0,
+      right: 0,
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 13,
+          vertical: 5,
+        ),
+        decoration: const BoxDecoration(
+          color: Color(0xFF292525),
+          borderRadius: BorderRadius.only(
+            topRight: Radius.circular(12),
+            bottomLeft: Radius.circular(12),
+          ),
+        ),
+        child: const Text(
+          '0% out of total',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+          ),
+        ),
+      ),
+    ),
+
+    // Arrow - original position
+    const Positioned(
+      right: 0,
+      bottom: 0,
+      child: CircleAvatar(
+        radius: 19,
+        backgroundColor: AppTheme.primary,
+        child: Icon(
+          Icons.north_east,
+          color: Colors.white,
+          size: 21,
+        ),
+      ),
+    ),
+  ],
+),
       ),
     );
   }
