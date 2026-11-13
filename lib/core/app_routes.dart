@@ -1,17 +1,18 @@
 
 import 'package:get/get.dart';
-
 import 'package:nvidiaapp/features/auth/auth_gate.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/register_screen.dart';
-import 'package:nvidiaapp/features/category/category_screen.dart';
-import 'package:nvidiaapp/features/history/history_category_screen.dart';
-import 'package:nvidiaapp/features/history/history_general_screen.dart';
-import 'package:nvidiaapp/features/home/home_screen.dart';
-import 'package:nvidiaapp/features/impulsive_calculator/impulsive_calculator_screen.dart';
+import 'package:nvidiaapp/features/category/presentation/screen/add_category_screen.dart';
+import 'package:nvidiaapp/features/category/presentation/screen/category_screen.dart';
+import 'package:nvidiaapp/features/history/presentation/screens/history_category_screen.dart';
+import 'package:nvidiaapp/features/history/presentation/screens/history_general.dart';
+import 'package:nvidiaapp/features/home/add-balance/add_balance_screen.dart';
+import 'package:nvidiaapp/features/home/presentation/screens/home_screen.dart';
 import 'package:nvidiaapp/features/on_boarding/presentation/screens/on_boarding_screen.dart';
 import 'package:nvidiaapp/features/splash/splash_screen.dart';
-import 'package:nvidiaapp/features/wishlist/wishlist_screen.dart';
+import 'package:nvidiaapp/features/impulse-calculator/presentation/screens/impulse_calculator_screen.dart';
+import 'package:nvidiaapp/features/wishlist/presentation/screen/savings_screen.dart';
 
 class Routes {
   // Initial
@@ -32,6 +33,9 @@ class Routes {
 
   // Impulsive Calculator
   static const String impulsiveCalculator = '/impulsive-calculator';
+
+  // Add Budget
+  static const String addBudget = '/add-budget';
 
   // Onboarding
   static const String onBoarding = '/on-boarding';
@@ -65,11 +69,11 @@ class Routes {
     ),
     GetPage(
       name: home,
-      page: () => const HomeScreen(),
+      page: () => HomeScreen(),
     ),
     GetPage(
       name: historyGeneral,
-      page: () => const HistoryGeneralScreen(),
+      page: () => HistoryGeneralScreen(),
     ),
     GetPage(
       name: historyCategory,
@@ -77,7 +81,7 @@ class Routes {
     ),
     GetPage(
       name: impulsiveCalculator,
-      page: () => const ImpulsiveCalculatorScreen(),
+      page: () => ImpulseCalculatorScreen(),
     ),
     GetPage(
       name: onBoarding,
@@ -85,11 +89,15 @@ class Routes {
     ),
     GetPage(
       name: wishlist,
-      page: () => const WishlistScreen(),
+      page: () => SavingsScreen(),
     ),
     GetPage(
       name: category,
-      page: () => const CategoryScreen(),
+      page: () => CategoryScreen(),
+    ),
+    GetPage(
+      name: addBudget,
+      page: () => AddBalanceScreen(),
     ),
   ];
 }

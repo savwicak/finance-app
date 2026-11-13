@@ -1,0 +1,74 @@
+{
+  "info": {
+    "name": "NVIDIA App - Home Dashboard APIs",
+    "_postman_id": "9f3e9a4d-1b12-4a9e-a4b7-2d2b6c3e8f10",
+    "description": "Tes Supabase Edge Functions untuk AI Financial Insight dan PayPal Checkout.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "supabase_url",
+      "value": "https://YOUR_PROJECT_REF.supabase.co"
+    },
+    {
+      "key": "anon_key",
+      "value": "YOUR_SUPABASE_ANON_KEY"
+    },
+    {
+      "key": "access_token",
+      "value": "YOUR_USER_ACCESS_TOKEN"
+    }
+  ],
+  "item": [
+    {
+      "name": "AI Financial Insight",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "apikey",
+            "value": "{{anon_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"todayExpense\": 45000,\n  \"totalExpense\": 850000,\n  \"budgetTotal\": 1500000,\n  \"budgetRemaining\": 650000,\n  \"categorySpending\": [\n    {\n      \"category\": \"Makanan\",\n      \"amount\": 350000\n    },\n    {\n      \"category\": \"Transport\",\n      \"amount\": 200000\n    },\n    {\n      \"category\": \"Hiburan\",\n      \"amount\": 150000\n    }\n  ]\n}"
+        },
+        "url": "{{supabase_url}}/functions/v1/financial-insight"
+      }
+    },
+    {
+      "name": "PayPal Create Order (requires your deployed function)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "apikey",
+            "value": "{{anon_key}}"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": 5,\n  \"currency\": \"USD\"\n}"
+        },
+        "url": "{{supabase_url}}/functions/v1/paypal-create-order"
+      }
+    }
+  ]
+}
