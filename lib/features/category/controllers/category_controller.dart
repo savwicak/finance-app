@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CategoryController extends GetxController {
@@ -155,18 +156,19 @@ class CategoryController extends GetxController {
       );
 
       Get.snackbar(
-        'Berhasil!',
-        'Kategori berhasil dihapus.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: const Color(0xFFB8E600),
-        colorText: Colors.black,
-        margin: const EdgeInsets.all(15),
-        borderRadius: 12,
-        icon: const Icon(
-          Icons.check_circle,
-          color: Colors.black,
-        ),
-      );
+  'Success!',
+  'Kategori berhasil dihapus!',
+  snackPosition: SnackPosition.TOP,
+  backgroundColor: AppTheme.primary,
+  colorText: Colors.black,
+  margin: const EdgeInsets.all(15),
+  borderRadius: 12,
+  duration: const Duration(seconds: 2),
+  icon: const Icon(
+    Icons.check_circle,
+    color: Colors.black,
+  ),
+);
 
       return true;
     } on PostgrestException catch (e) {

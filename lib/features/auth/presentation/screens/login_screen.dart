@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:nvidiaapp/core/di.dart';
+import 'package:nvidiaapp/core/theme/app_theme.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -56,7 +57,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         'Masuk',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600
+                        ),
                       ),
                       const SizedBox(height: 4),
                       const Text('Masuk untuk mulai mencatat uang sakumu.'),

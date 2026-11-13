@@ -48,7 +48,7 @@ class AuthGate extends StatelessWidget {
             }
 
             if (onboardingSnapshot.data == true) {
-              return const AppNavigation();
+              return  AppNavigation();
             }
 
             if (!Get.isRegistered<OnboardingController>()) {

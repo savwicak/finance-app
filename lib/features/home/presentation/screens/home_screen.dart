@@ -1,6 +1,9 @@
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nvidiaapp/core/navigation/app_navigation.dart';
 import 'package:nvidiaapp/features/home/widgets/impulsive_calculator_button.dart';
+
 import '../../controllers/home_controller.dart';
 import '../../models/dashboard_models.dart';
 import '../../widgets/home_widgets.dart';
@@ -15,6 +18,7 @@ class HomeScreen extends StatelessWidget {
     DashboardSavingsGoal goal,
   ) async {
     final amountController = TextEditingController();
+
     final amount = await showDialog<int>(
       context: context,
       builder: (context) => AlertDialog(
@@ -28,21 +32,72 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Batal')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
           ElevatedButton(
             onPressed: () {
-              final value = int.tryParse(amountController.text.replaceAll('.', '').replaceAll(',', ''));
-              if (value != null && value > 0) Navigator.pop(context, value);
+              final value = int.tryParse(
+                amountController.text
+                    .replaceAll('.', '')
+                    .replaceAll(',', ''),
+              );
+
+              if (value != null && value > 0) {
+                Navigator.pop(context, value);
+              }
             },
             child: const Text('Lanjut ke PayPal'),
           ),
         ],
       ),
     );
+
     amountController.dispose();
 
     if (amount != null) {
-      await controller.quickDeposit(goalId: goal.id, amount: amount);
+      await controller.quickDeposit(
+        goalId: goal.id,
+        amount: amount,
+      );
+    }
+  }
+
+  // CONFIRM DELETE DIALOG
+  Future<void> _confirmDeleteGoal(
+    BuildContext context,
+    DashboardSavingsGoal goal,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Delete Saving Goal?'),
+        content: Text(
+          'Are you sure you want to delete "${goal.name}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, false);
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext, true);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await controller.deleteGoal(goal.id);
     }
   }
 
@@ -52,10 +107,13 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF7F7F5),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
-        if (controller.errorMessage.value.isNotEmpty && controller.summary.value == null) {
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.summary.value == null) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(24),
@@ -64,9 +122,15 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.cloud_off, size: 42),
                   const SizedBox(height: 12),
-                  Text(controller.errorMessage.value, textAlign: TextAlign.center),
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                  ),
                   const SizedBox(height: 12),
-                  ElevatedButton(onPressed: controller.loadDashboard, child: const Text('Coba lagi')),
+                  ElevatedButton(
+                    onPressed: controller.loadDashboard,
+                    child: const Text('Coba lagi'),
+                  ),
                 ],
               ),
             ),
@@ -74,96 +138,132 @@ class HomeScreen extends StatelessWidget {
         }
 
         final data = controller.summary.value;
-        if (data == null) return const Center(child: Text('Belum ada data dashboard.'));
 
-      return RefreshIndicator(
-        onRefresh: () async {
-          await controller.loadDashboard();
-        },
-        color: Colors.deepPurple,
-        backgroundColor: Colors.white,
-        displacement: 50,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
+        if (data == null) {
+          return const Center(
+            child: Text('Belum ada data dashboard.'),
+          );
+        }
+
+        final recentGoals = data.goals.take(2).toList();
+        final recentTransactions =
+            data.transactions.take(2).toList();
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            await controller.loadDashboard();
+          },
+          color: Colors.deepPurple,
+          backgroundColor: Colors.white,
+          displacement: 50,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            slivers: [
+              SliverToBoxAdapter(
+                child: BalanceHeader(
+                  balance: data.balance,
+                  todayExpense: data.todayExpense,
+                  remainingBudget: data.remainingBudget,
+                  monthlyBudget: data.monthlyBudget,
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    InsightCard(
+                      insight: controller.insight.value,
+                    ),
+                    const SizedBox(height: 18),
+
+                    ImpulsiveCalculatorButton(),
+                    const SizedBox(height: 22),
+
+                    // WISHLIST
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Wishlist',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.find<AppNavigationController>()
+                                .changeTab(3);
+                          },
+                          child: const Text('View all'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    if (data.goals.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          'No wishlist yet. Add them from Wishlist menu.',
+                        ),
+                      )
+                    else
+                      ...recentGoals.map(
+                        (goal) => SavingsGoalCard(
+                          goal: goal,
+                          onDeposit: () {
+                            _showDepositDialog(context, goal);
+                          },
+                          onDelete: () {
+                            _confirmDeleteGoal(context, goal);
+                          },
+                        ),
+                      ),
+
+                    const SizedBox(height: 15),
+
+                    // HISTORY
+                    Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'History',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.find<AppNavigationController>()
+                                .changeTab(1);
+                          },
+                          child: const Text('View all'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    if (data.transactions.isEmpty)
+                      const Text('No transaction yet.')
+                    else
+                      ...recentTransactions.map(
+                        (transaction) =>
+                            RecentTransactionTile(
+                          transaction: transaction,
+                        ),
+                      ),
+                  ]),
+                ),
+              ),
+            ],
           ),
-          slivers: [
-            SliverToBoxAdapter(
-              child: BalanceHeader(
-                balance: data.balance,
-                todayExpense: data.todayExpense,
-                remainingBudget: data.remainingBudget,
-                monthlyBudget: data.monthlyBudget,
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 28),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  InsightCard(insight: controller.insight.value),
-                  const SizedBox(height: 18),
-                  ImpulsiveCalculatorButton(),
-                  const SizedBox(height: 22),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Tabungan',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('View all'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (data.goals.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        'Belum ada target tabungan. Tambahkan target dari menu Savings.',
-                      ),
-                    )
-                  else
-                    ...data.goals.map(
-                      (goal) => SavingsGoalCard(
-                        goal: goal,
-                        onDeposit: () => _showDepositDialog(context, goal),
-                      ),
-                    ),
-                  const SizedBox(height: 15),
-                  Row(
-                    children: [
-                      const Expanded(
-                        child: Text(
-                          'Riwayat',
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text('View all'),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (data.transactions.isEmpty)
-                    const Text('Belum ada transaksi.')
-                  else
-                    ...data.transactions.map(
-                      (transaction) => RecentTransactionTile(
-                        transaction: transaction,
-                      ),
-                    ),
-                ]),
-              ),
-            ),
-          ],
-        ),
-      );
-
+        );
       }),
     );
   }
