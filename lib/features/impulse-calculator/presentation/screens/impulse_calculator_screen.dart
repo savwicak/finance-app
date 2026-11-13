@@ -161,39 +161,34 @@ class ImpulseCalculatorScreen extends StatelessWidget {
                       const Text('Category'),
                       const SizedBox(height: 8),
 
-                      Obx(() {
-                        final selectedId = controller.selectedCategoryId.value;
+                      Obx(
+                        () => Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8F6F7),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFE5E5ED),
+                            ),
+                          ),
+                          child: Text(
+                            controller.selectedWishlistId.value == null
+                                ? 'Kategori akan muncul setelah memilih barang'
+                                : controller.selectedCategoryName == '-'
+                                    ? 'Barang belum memiliki kategori'
+                                    : controller.selectedCategoryName,
+                            style: TextStyle(
+                              color: controller.selectedCategoryId.value == null
+                                  ? Colors.grey
+                                  : Colors.black,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
 
-                        final validValue = controller.categories.any(
-                          (item) => (item['id'] as num).toInt() == selectedId,
-                        ) ? selectedId : null;
-
-                        if (controller.categories.isEmpty) {
-                          return const Text(
-                            'Kategori belum tersedia.',
-                            style: TextStyle(color: Colors.red),
-                          );
-                        }
-
-                        return DropdownButtonFormField<int>(
-                          value: validValue,
-                          isExpanded: true,
-                          decoration: inputDecoration('Pilih kategori'),
-                          hint: const Text('Pilih kategori'),
-                          items: controller.categories.map((category) {
-                            final id = (category['id'] as num).toInt();
-
-                            return DropdownMenuItem<int>(
-                              value: id,
-                              child: Text(category['name'].toString()),
-                            );
-                          }).toList(),
-                          onChanged: controller.isUpdatingCategory.value
-                              ? null
-                              : controller.updateCategory,
-                        );
-                      }),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 20),
 
                       // OUT OF PLAN
                       Obx(
