@@ -210,7 +210,7 @@ class ImpulseCalculatorScreen extends StatelessWidget {
                               ),
                             );
                           }).toList(),
-                          onChanged: (value) {
+                          onChanged: (value) {  
                             if (value != null) {
                               controller.selectedMethod.value = value;
                             }

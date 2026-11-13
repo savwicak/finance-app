@@ -134,7 +134,7 @@ class ImpulseCalculatorController extends GetxController {
     return '-';
   }
 
-  // FETCH WISHLIST
+
   Future<void> fetchWishlist() async {
     try {
       final uid = userId;
@@ -143,21 +143,32 @@ class ImpulseCalculatorController extends GetxController {
       final response = await supabase
           .from('savings_goals')
           .select(
-            'id, name, target_amount, category_id, is_out_of_plan',
+            'id, name, target_amount, category_id, is_out_of_plan, is_done',
           )
           .eq('user_id', uid)
+          .eq('is_done', false)
           .order('created_at', ascending: false);
 
       wishlist.assignAll(
         List<Map<String, dynamic>>.from(response),
       );
 
-      print('WISHLIST LOADED: ${wishlist.length}');
+      // Reset pilihan jika Wishlist yang dipilih sudah tidak aktif
+      if (selectedWishlistId.value != null &&
+          !wishlist.any(
+            (item) =>
+                (item['id'] as num?)?.toInt() == selectedWishlistId.value,
+          )) {
+        updateWishlist(null);
+      }
+
+      print('ACTIVE WISHLIST LOADED: ${wishlist.length}');
     } catch (e) {
       print('FETCH WISHLIST ERROR: $e');
       Get.snackbar('Error', 'Gagal mengambil Wishlist: $e');
     }
   }
+
 
   // SELECT WISHLIST
   void updateWishlist(int? value) {
@@ -347,34 +358,25 @@ class ImpulseCalculatorController extends GetxController {
       moneyDurability.value = 0;
     }
   }
-
   // BUY ANYWAY
   Future<void> buyAnyway() async {
     if (selectedWishlistId.value == null) {
-      Get.snackbar(
-        'Input belum lengkap',
-        'Pilih barang dari Wishlist terlebih dahulu.',
-      );
+      Get.snackbar('Input belum lengkap', 'Pilih barang dari Wishlist terlebih dahulu.');
       return;
     }
 
     if (price.value <= 0) {
-      Get.snackbar(
-        'Input belum lengkap',
-        'Harga barang tidak valid.',
-      );
+      Get.snackbar('Input belum lengkap', 'Harga barang tidak valid.');
       return;
     }
 
     if (selectedCategoryId.value == null) {
-      Get.snackbar(
-        'Input belum lengkap',
-        'Pilih kategori barang terlebih dahulu.',
-      );
+      Get.snackbar('Input belum lengkap', 'Pilih kategori barang terlebih dahulu.');
       return;
     }
 
     final uid = userId;
+    final wishlistId = selectedWishlistId.value;
 
     if (uid == null) {
       Get.snackbar('Error', 'Silakan login terlebih dahulu.');
@@ -386,6 +388,7 @@ class ImpulseCalculatorController extends GetxController {
     isSaving.value = true;
 
     try {
+      // Simpan transaksi pembelian
       await supabase.from('transactions').insert({
         'user_id': uid,
         'category_id': selectedCategoryId.value,
@@ -397,6 +400,13 @@ class ImpulseCalculatorController extends GetxController {
         'source': 'manual',
       });
 
+      // Tandai Wishlist sebagai selesai
+      await supabase
+          .from('savings_goals')
+          .update({'is_done': true})
+          .eq('id', wishlistId!)
+          .eq('user_id', uid);
+
       await homeController.loadDashboard();
 
       calculate();
@@ -405,7 +415,7 @@ class ImpulseCalculatorController extends GetxController {
 
       Get.snackbar(
         'Berhasil',
-        'Transaksi berhasil ditambahkan.',
+        'Transaksi berhasil ditambahkan dan Wishlist ditandai selesai.',
       );
     } catch (e) {
       print('BUY ANYWAY ERROR: $e');

@@ -33,12 +33,14 @@ class DashboardTransaction {
   bool get isIncome => type == 'income' || type == 'deposit' || type == 'topup';
 }
 
+
 class DashboardSavingsGoal {
   final String id;
   final String name;
   final int targetAmount;
   final int savedAmount;
   final DateTime? dueDate;
+  final bool isDone;
 
   const DashboardSavingsGoal({
     required this.id,
@@ -46,6 +48,7 @@ class DashboardSavingsGoal {
     required this.targetAmount,
     required this.savedAmount,
     this.dueDate,
+    this.isDone = false,
   });
 
   double get progress => targetAmount <= 0
@@ -64,6 +67,7 @@ class DashboardSavingsGoal {
       dueDate: map['due_date'] == null
           ? null
           : DateTime.tryParse(map['due_date'].toString()),
+      isDone: map['is_done'] as bool? ?? false,
     );
   }
 }

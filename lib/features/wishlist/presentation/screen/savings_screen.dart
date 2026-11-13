@@ -3,34 +3,26 @@ import 'package:get/get.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
 import 'package:nvidiaapp/features/wishlist/controller/savings_controller.dart';
 import 'package:nvidiaapp/features/category/controllers/category_controller.dart';
-
 class SavingsScreen extends StatelessWidget {
   SavingsScreen({super.key});
-
   final SavingsController controller = Get.put(SavingsController());
   final CategoryController categoryController = Get.put(CategoryController());
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController targetController = TextEditingController();
 
+  final TextEditingController searchController = TextEditingController();
+  final RxString searchQuery = ''.obs;
   String formatRupiah(int amount) {
     return 'Rp ${amount.toString().replaceAllMapped(RegExp(r'\B(?=(\d{3})+(?!\d))'), (match) => '.')}';
   }
-
   void showAddGoalDialog() {
     nameController.clear();
     targetController.clear();
-
     int? selectedCategoryId;
-    DateTime? selectedDate;
-    bool isOutOfPlan = false;
-    bool isDone = false;
-
     Get.dialog(
       StatefulBuilder(
         builder: (context, setDialogState) {
           final categories = categoryController.categories;
-
           return AlertDialog(
             backgroundColor: Colors.white,
             insetPadding: const EdgeInsets.symmetric(horizontal: 20),
@@ -57,7 +49,6 @@ class SavingsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-
                     TextField(
                       controller: targetController,
                       keyboardType: TextInputType.number,
@@ -73,7 +64,6 @@ class SavingsScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 14),
-
                     // CATEGORY DROPDOWN
                     DropdownButtonFormField<int>(
                       value: selectedCategoryId,
@@ -89,7 +79,6 @@ class SavingsScreen extends StatelessWidget {
                       ),
                       items: categories.map((category) {
                         final id = (category['id'] as num).toInt();
-
                         return DropdownMenuItem<int>(
                           value: id,
                           child: Text(
@@ -105,84 +94,6 @@ class SavingsScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 14),
-
-                    // DATE PICKER
-                    InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () async {
-                        final picked = await showDatePicker(
-                          context: context,
-                          initialDate: selectedDate ?? DateTime.now(),
-                          firstDate: DateTime.now(),
-                          lastDate: DateTime(2100),
-                        );
-
-                        if (picked != null) {
-                          setDialogState(() {
-                            selectedDate = picked;
-                          });
-                        }
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 18,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F6F7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.calendar_month,
-                              color: Colors.black54,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                selectedDate == null
-                                    ? 'Pilih tanggal target'
-                                    : '${selectedDate!.day.toString().padLeft(2, '0')}/'
-                                      '${selectedDate!.month.toString().padLeft(2, '0')}/'
-                                      '${selectedDate!.year}',
-                              ),
-                            ),
-                            const Icon(
-                              Icons.arrow_drop_down,
-                              color: Colors.black54,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Out of Plan'),
-                      value: isOutOfPlan,
-                      activeColor: const Color(0xFFB8E600),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          isOutOfPlan = value ?? false;
-                        });
-                      },
-                    ),
-
-                    CheckboxListTile(
-                      contentPadding: EdgeInsets.zero,
-                      title: const Text('Wishlist sudah terpenuhi'),
-                      value: isDone,
-                      activeColor: const Color(0xFFB8E600),
-                      onChanged: (value) {
-                        setDialogState(() {
-                          isDone = value ?? false;
-                        });
-                      },
-                    ),
                   ],
                 ),
               ),
@@ -202,7 +113,6 @@ class SavingsScreen extends StatelessWidget {
                   final target = int.tryParse(
                     targetController.text.trim(),
                   );
-
                   if (name.isEmpty || target == null || target <= 0) {
                     Get.snackbar(
                       'Invalid Input',
@@ -210,16 +120,14 @@ class SavingsScreen extends StatelessWidget {
                     );
                     return;
                   }
-
                   final success = await controller.addGoal(
                     name: name,
                     targetAmount: target,
                     categoryId: selectedCategoryId,
-                    dueDate: selectedDate,
-                    isOutOfPlan: isOutOfPlan,
-                    isDone: isDone,
+                    dueDate: null,
+                    isOutOfPlan: false,
+                    isDone: false,
                   );
-
                   if (success) {
                     Get.back(closeOverlays: true);
                   }
@@ -235,7 +143,6 @@ class SavingsScreen extends StatelessWidget {
   // Tipe data goalId diubah menjadi int
   void showDepositDialog(int goalId, String goalName) {
     final TextEditingController depositController = TextEditingController();
-
     Get.dialog(
       AlertDialog(
         backgroundColor: Colors.white,
@@ -266,7 +173,6 @@ class SavingsScreen extends StatelessWidget {
             ),
             onPressed: () async {
               final amount = int.tryParse(depositController.text.trim());
-
               if (amount == null || amount <= 0) {
                 Get.snackbar(
                   'Invalid Input',
@@ -281,17 +187,13 @@ class SavingsScreen extends StatelessWidget {
                 );
                 return;
               }
-
               // TODO: Ganti dengan memanggil method deposit dari PayPal controller kamu
               // Contoh:
               // final success = await payPalController.processDeposit(goalId: goalId, amount: amount);
               // if (success) { await controller.fetchGoals(); }
-
               Get.back(); // Tutup dialog input nominal
-
               // Contoh simulasi update state setelah berhasil:
               await controller.fetchGoals();
-
               Get.snackbar(
                 'Success!',
                 'Berhasil menyetor ${formatRupiah(amount)} ke $goalName!',
@@ -310,7 +212,6 @@ class SavingsScreen extends StatelessWidget {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -365,7 +266,7 @@ class SavingsScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   Obx(
                     () => Text(
-                      '${controller.goals.length} Items in list',
+                      '${controller.goals.where((goal) => !goal.isDone && controller.totalSavedForGoal(goal.id) < goal.targetAmount).length} Items in list',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -377,9 +278,7 @@ class SavingsScreen extends StatelessWidget {
               ),
             ),
           ),
-
           const SizedBox(height: 10),
-
           // BODY SECTION (Putih melengkung ke atas)
           Expanded(
             child: Container(
@@ -397,8 +296,12 @@ class SavingsScreen extends StatelessWidget {
                       children: [
                         Expanded(
                           child: TextField(
+                            controller: searchController,
+                            onChanged: (value) {
+                              searchQuery.value = value.toLowerCase().trim();
+                            },
                             decoration: InputDecoration(
-                              hintText: 'Find category..',
+                              hintText: 'Cari wishlist...',
                               hintStyle: const TextStyle(
                                 color: Colors.black26,
                                 fontSize: 14,
@@ -408,22 +311,31 @@ class SavingsScreen extends StatelessWidget {
                                 color: Colors.black26,
                                 size: 20,
                               ),
+                              suffixIcon: Obx(
+                                () => searchQuery.value.isNotEmpty
+                                    ? IconButton(
+                                        onPressed: () {
+                                          searchController.clear();
+                                          searchQuery.value = '';
+                                        },
+                                        icon: const Icon(Icons.close, size: 18),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ),
                               filled: true,
                               fillColor: Colors.white,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 0,
-                              ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 0),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFE3E8EF),
-                                ),
+                                borderSide: const BorderSide(color: Color(0xFFE3E8EF)),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFFE3E8EF),
-                                ),
+                                borderSide: const BorderSide(color: Color(0xFFE3E8EF)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: const BorderSide(color: Color(0xFFB8E600)),
                               ),
                             ),
                           ),
@@ -452,7 +364,6 @@ class SavingsScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-
                   // List Tabungan
                   Expanded(
                     child: Obx(() {
@@ -463,8 +374,17 @@ class SavingsScreen extends StatelessWidget {
                           ),
                         );
                       }
+                      final activeGoals = controller.goals.where((goal) {
+                      final isActive = !goal.isDone &&
+                          controller.totalSavedForGoal(goal.id) < goal.targetAmount;
 
-                      if (controller.goals.isEmpty) {
+                      final matchesSearch = goal.name.toLowerCase().contains(
+                        searchQuery.value,
+                      );
+
+                      return isActive && matchesSearch;
+                    }).toList();
+                      if (activeGoals.isEmpty) {
                         return const Center(
                           child: Text(
                             'Belum ada target tabungan',
@@ -475,7 +395,6 @@ class SavingsScreen extends StatelessWidget {
                           ),
                         );
                       }
-
                       return RefreshIndicator(
                         onRefresh: controller.fetchGoals,
                         color: const Color(0xFFB8E600),
@@ -485,16 +404,14 @@ class SavingsScreen extends StatelessWidget {
                             vertical: 8,
                           ),
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: controller.goals.length,
+                          itemCount: activeGoals.length,
                           itemBuilder: (context, index) {
-                            final goal = controller.goals[index];
-
+                            final goal = activeGoals[index];
                             // Hitung progress secara manual untuk di-pass ke widget
                             final saved = controller.totalSavedForGoal(goal.id);
                             final progress = goal.targetAmount > 0
                                 ? (saved / goal.targetAmount).clamp(0.0, 1.0)
                                 : 0.0;
-
                             return _buildSavingsGoalCard(
                               name: goal.name,
                               savedAmount: saved,
@@ -524,7 +441,6 @@ class SavingsScreen extends StatelessWidget {
                                     ],
                                   ),
                                 );
-
                                 if (confirm == true) {
                                   await controller.deleteGoal(goal.id);
                                 }
@@ -548,7 +464,6 @@ class SavingsScreen extends StatelessWidget {
       ),
     );
   }
-
   // Tipe data onDeposit diubah menjadi Future<void> Function()
   Widget _buildSavingsGoalCard({
     required String name,
@@ -583,11 +498,6 @@ class SavingsScreen extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Target: 25 Okt 2026',
-                      style: TextStyle(fontSize: 13, color: Color(0xFFB0B4BA)),
                     ),
                   ],
                 ),

@@ -64,7 +64,6 @@ class HomeScreen extends StatelessWidget {
     }
   }
 
-  // CONFIRM DELETE DIALOG
   Future<void> _confirmDeleteGoal(
     BuildContext context,
     DashboardSavingsGoal goal,
@@ -145,9 +144,23 @@ class HomeScreen extends StatelessWidget {
           );
         }
 
-        final recentGoals = data.goals.take(2).toList();
-        final recentTransactions =
-            data.transactions.take(2).toList();
+        // WISHLIST
+        // Tetap mengambil saving goals dari DashboardSummary.
+        // Quick Deposit tetap menggunakan PayPal.
+        final activeGoals = data.goals
+            .where((goal) => !goal.isDone)
+            .take(2)
+            .toList();
+
+        // HISTORY: URUTKAN DARI TERBARU
+        final recentTransactions = [...data.transactions]
+          ..sort(
+            (a, b) => b.createdAt.compareTo(a.createdAt),
+          );
+
+        // HANYA 2 TRANSAKSI
+        final latestTransactions =
+            recentTransactions.take(2).toList();
 
         return RefreshIndicator(
           onRefresh: () async {
@@ -204,7 +217,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    if (data.goals.isEmpty)
+                    if (activeGoals.isEmpty)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
@@ -212,7 +225,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       )
                     else
-                      ...recentGoals.map(
+                      ...activeGoals.map(
                         (goal) => SavingsGoalCard(
                           goal: goal,
                           onDeposit: () {
@@ -249,13 +262,20 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    if (data.transactions.isEmpty)
-                      const Text('No transaction yet.')
+                    if (latestTransactions.isEmpty)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Text('No transaction yet.'),
+                        ),
+                      )
                     else
-                      ...recentTransactions.map(
-                        (transaction) =>
-                            RecentTransactionTile(
-                          transaction: transaction,
+                      ...latestTransactions.map(
+                        (transaction) => Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: RecentTransactionTile(
+                            transaction: transaction,
+                          ),
                         ),
                       ),
                   ]),

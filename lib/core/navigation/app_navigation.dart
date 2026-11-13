@@ -94,7 +94,7 @@ class AppNavigation extends StatelessWidget {
               top: -10,
               child: GestureDetector(
                 onTap: () {
-                  Get.toNamed(Routes.impulsiveCalculator);
+                  Get.toNamed(Routes.addBudget);
                 },
                 child: Container(
                   width: 62,

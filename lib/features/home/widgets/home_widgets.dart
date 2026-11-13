@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:nvidiaapp/core/theme/app_theme.dart';
+import 'package:nvidiaapp/features/home/add-balance/add_balance_screen.dart';
 import 'package:nvidiaapp/features/home/widgets/setting_sheet.dart';
 
 import '../models/dashboard_models.dart';
@@ -72,20 +74,44 @@ class BalanceHeader extends StatelessWidget {
               ],
             ),
             SizedBox(height: 15),
-            Text(
-              'Your balance',
-              style: TextStyle(fontSize: 14, color: Colors.white),
-            ),
-            const SizedBox(height: 5),
-            Text(
-              formatRupiah(balance),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 29,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => const AddBalanceScreen());
+              },
+              borderRadius: BorderRadius.circular(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Your balance',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      Text(
+                        formatRupiah(balance),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 29,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Icon(
+                        Icons.add_circle_outline,
+                        color: Color(0xFFB7E900),
+                        size: 23,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 5),
             Row(
               children: [
                 Text('Jatah harian:', style: TextStyle(color: Colors.white70)),
@@ -120,55 +146,6 @@ class BalanceHeader extends StatelessWidget {
                 ),
               ],
             ),
-            // Row(
-            //   children: [
-            //     const Expanded(
-            //       child: Text(
-            //         'Sisa budget bulan ini',
-            //         style: TextStyle(color: Colors.white70),
-            //       ),
-            //     ),
-            //     Container(
-            //       padding: const EdgeInsets.symmetric(
-            //         horizontal: 12,
-            //         vertical: 5,
-            //       ),
-            //       decoration: BoxDecoration(
-            //         color: remainingBudget < 0
-            //             ? Colors.redAccent
-            //             : const Color(0xFFB7E900),
-            //         borderRadius: BorderRadius.circular(20),
-            //       ),
-            //       child: Text(
-            //         remainingBudget < 0 ? 'Melebihi budget' : 'Aman',
-            //         style: const TextStyle(
-            //           color: Colors.black,
-            //           fontSize: 11,
-            //           fontWeight: FontWeight.bold,
-            //         ),
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 7),
-            // Text(
-            //   formatRupiah(safeRemaining),
-            //   style: const TextStyle(
-            //     color: Colors.white,
-            //     fontSize: 21,
-            //     fontWeight: FontWeight.bold,
-            //   ),
-            // ),
-            // const SizedBox(height: 9),
-            // ClipRRect(
-            //   borderRadius: BorderRadius.circular(20),
-            //   child: LinearProgressIndicator(
-            //     value: progress,
-            //     minHeight: 8,
-            //     backgroundColor: Colors.white24,
-            //     valueColor: const AlwaysStoppedAnimation(Color(0xFFB7E900)),
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -362,15 +339,6 @@ class SavingsGoalCard extends StatelessWidget {
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.black87,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Target: $targetDate',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFB0B4BA),
                       ),
                     ),
                   ],

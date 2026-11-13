@@ -10,8 +10,7 @@ import '../widgets/history_transaction_card.dart';
 class HistoryGeneralScreen extends StatelessWidget {
   HistoryGeneralScreen({super.key});
 
-  final HistoryGeneralController controller =
-      Get.put(HistoryGeneralController());
+  final HistoryGeneralController controller = Get.put(HistoryGeneralController());
 
   @override
   Widget build(BuildContext context) {
@@ -24,9 +23,7 @@ class HistoryGeneralScreen extends StatelessWidget {
             const SizedBox(height: 22),
             _buildMonthSelector(),
             const SizedBox(height: 25),
-            Expanded(
-              child: _buildHistoryContent(),
-            ),
+            Expanded(child: _buildHistoryContent()),
           ],
         ),
       ),
@@ -38,6 +35,7 @@ class HistoryGeneralScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -47,37 +45,6 @@ class HistoryGeneralScreen extends StatelessWidget {
                   color: Colors.white,
                   fontSize: 25,
                   fontWeight: FontWeight.w600,
-                ),
-              ),
-              InkWell(
-                onTap: controller.exportCsv,
-                borderRadius: BorderRadius.circular(30),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 19,
-                    vertical: 9,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Row(
-                    children: [
-                      Text(
-                        'Download',
-                        style: TextStyle(
-                          color: Colors.black87,
-                          fontSize: 14,
-                        ),
-                      ),
-                      SizedBox(width: 9),
-                      Icon(
-                        Icons.download,
-                        size: 19,
-                        color: Colors.black,
-                      ),
-                    ],
-                  ),
                 ),
               ),
             ],
@@ -133,6 +100,8 @@ class HistoryGeneralScreen extends StatelessWidget {
         }
 
         final groups = controller.groupedTransactions;
+
+        // Tanggal terbaru selalu ditampilkan paling atas.
         final dates = groups.keys.toList()
           ..sort((a, b) => b.compareTo(a));
 
@@ -159,20 +128,20 @@ class HistoryGeneralScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDateGroup(date, items) {
+  Widget _buildDateGroup(DateTime date, List items) {
+    final formattedDate = controller.formatGroupDate(date);
+    final separatorIndex = formattedDate.indexOf(' ');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.only(
-            bottom: 14,
-            top: 4,
-          ),
+          padding: const EdgeInsets.only(bottom: 14, top: 4),
           child: Text.rich(
             TextSpan(
               children: [
                 TextSpan(
-                  text: controller.formatGroupDate(date).split(' ').first,
+                  text: formattedDate.substring(0, separatorIndex),
                   style: const TextStyle(
                     fontWeight: FontWeight.w500,
                     color: Colors.black,
@@ -180,9 +149,7 @@ class HistoryGeneralScreen extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: controller.formatGroupDate(date).substring(
-                        controller.formatGroupDate(date).indexOf(' ') + 1,
-                      ),
+                  text: formattedDate.substring(separatorIndex),
                   style: const TextStyle(
                     fontSize: 15,
                     color: Colors.black54,

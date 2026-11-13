@@ -3,9 +3,11 @@ import 'package:get/get.dart';
 import 'package:nvidiaapp/features/auth/auth_gate.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/login_screen.dart';
 import 'package:nvidiaapp/features/auth/presentation/screens/register_screen.dart';
+import 'package:nvidiaapp/features/category/presentation/screen/add_category_screen.dart';
 import 'package:nvidiaapp/features/category/presentation/screen/category_screen.dart';
-import 'package:nvidiaapp/features/history/presentation/screen/history_category_screen.dart';
+import 'package:nvidiaapp/features/history/presentation/screens/history_category_screen.dart';
 import 'package:nvidiaapp/features/history/presentation/screens/history_general.dart';
+import 'package:nvidiaapp/features/home/add-balance/add_balance_screen.dart';
 import 'package:nvidiaapp/features/home/presentation/screens/home_screen.dart';
 import 'package:nvidiaapp/features/on_boarding/presentation/screens/on_boarding_screen.dart';
 import 'package:nvidiaapp/features/splash/splash_screen.dart';
@@ -31,6 +33,9 @@ class Routes {
 
   // Impulsive Calculator
   static const String impulsiveCalculator = '/impulsive-calculator';
+
+  // Add Budget
+  static const String addBudget = '/add-budget';
 
   // Onboarding
   static const String onBoarding = '/on-boarding';
@@ -89,6 +94,10 @@ class Routes {
     GetPage(
       name: category,
       page: () => CategoryScreen(),
+    ),
+    GetPage(
+      name: addBudget,
+      page: () => AddBalanceScreen(),
     ),
   ];
 }

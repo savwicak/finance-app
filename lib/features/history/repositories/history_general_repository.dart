@@ -1,5 +1,6 @@
 
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../models/transaction_model.dart';
 
 class HistoryGeneralRepository {
@@ -14,7 +15,7 @@ class HistoryGeneralRepository {
       throw Exception('User belum login');
     }
 
-    // Batas bulan berdasarkan waktu lokal
+    // Batas bulan berdasarkan waktu lokal.
     final startDate = DateTime(
       month.year,
       month.month,
@@ -39,21 +40,15 @@ class HistoryGeneralRepository {
         ''')
         .eq('user_id', user.id)
         .gte(
-          'occurred_at',
+          'created_at',
           startDate.toUtc().toIso8601String(),
         )
         .lt(
-          'occurred_at',
+          'created_at',
           endDate.toUtc().toIso8601String(),
         )
-        .order('occurred_at', ascending: false);
-
-    print('===== HISTORY TRANSACTIONS =====');
-    print('USER: ${user.id}');
-    print('START: ${startDate.toUtc()}');
-    print('END: ${endDate.toUtc()}');
-    print('TOTAL: ${(response as List).length}');
-    print('DATA: $response');
+        .order('created_at', ascending: false)
+        .order('id', ascending: false);
 
     return (response as List)
         .map(

@@ -7,6 +7,7 @@ class TransactionModel {
   final String source;
   final String? note;
   final DateTime occurredAt;
+  final DateTime createdAt;
   final String? categoryName;
   final String? categoryIcon;
   final String? categoryColor;
@@ -19,6 +20,7 @@ class TransactionModel {
     required this.method,
     required this.source,
     required this.occurredAt,
+    required this.createdAt,
     this.note,
     this.categoryName,
     this.categoryIcon,
@@ -36,13 +38,18 @@ class TransactionModel {
         : <String, dynamic>{};
 
     return TransactionModel(
-      id: json['id'] as int,
+      id: (json['id'] as num).toInt(),
       amount: (json['amount'] as num).toInt(),
       type: json['type']?.toString() ?? '',
       method: json['method']?.toString() ?? '',
       source: json['source']?.toString() ?? '',
       note: json['note']?.toString(),
-      occurredAt: DateTime.parse(json['occurred_at'].toString()).toLocal(),
+      occurredAt: DateTime.parse(
+        json['occurred_at'].toString(),
+      ).toLocal(),
+      createdAt: DateTime.parse(
+        json['created_at'].toString(),
+      ).toLocal(),
       categoryName: category['name']?.toString(),
       categoryIcon: category['icon']?.toString(),
       categoryColor: category['color']?.toString(),
@@ -53,20 +60,26 @@ class TransactionModel {
   bool get isIncome => type.toLowerCase() == 'income';
 
   String get displayTitle {
-    if (merchant != null && merchant!.isNotEmpty) {
+    if (merchant != null && merchant!.trim().isNotEmpty) {
       return merchant!;
     }
 
-    if (categoryName != null && categoryName!.isNotEmpty) {
+    if (categoryName != null && categoryName!.trim().isNotEmpty) {
       return categoryName!;
     }
 
-    return 'Other Transaction';
+    if (note != null && note!.trim().isNotEmpty) {
+      return note!;
+    }
+
+    return isIncome ? 'Pemasukan' : 'Pengeluaran';
   }
 
   String get displayDescription {
-    if (note != null && note!.isNotEmpty) {
-      return note!;
+    if (note != null && note!.trim().isNotEmpty) {
+      if (note!.trim() != displayTitle) {
+        return note!;
+      }
     }
 
     if (source.toLowerCase().contains('paypal')) {
@@ -78,6 +91,6 @@ class TransactionModel {
       return 'AI Receipt Scan';
     }
 
-    return categoryName ?? 'No description';
+    return isIncome ? 'Pemasukan uang' : 'Pengeluaran uang';
   }
 }

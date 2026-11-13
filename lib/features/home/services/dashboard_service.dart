@@ -28,7 +28,9 @@ class DashboardService {
           'id, name, icon, color, is_impulsive, is_default, '
           'is_archived, is_archive, user_id',
         )
-        .or('user_id.eq.$userId,is_default.eq.true')
+        .eq('user_id', userId)
+        .eq('is_archive', false)
+        .eq('is_archived', false)
         .order('sort_order', ascending: true);
 
     return List<Map<String, dynamic>>.from(response)
